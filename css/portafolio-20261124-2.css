@@ -1,4 +1,4 @@
-/* Portafolio de ediquin · 24/11/2026
+/* Portafolio de ediquin · 24/11/2026 (v2: bloque para la iglesia, versión en inglés)
    Sistema: papel cálido + tinta + un solo acento bermellón. Bricolage Grotesque (títulos),
    DM Sans (texto) y Fraunces itálica (énfasis). Sin librerías; todo propio. */
 
@@ -107,6 +107,9 @@ p { margin: 0; }
 }
 .marca:hover .marca-e { transform: rotate(-12deg) scale(1.08); }
 .menu { display: flex; gap: 4px; margin-left: auto; }
+.barra-der { display: flex; align-items: center; gap: 10px; }
+.idioma { display: inline-grid; place-items: center; min-width: 44px; height: 40px; padding: 0 10px; border-radius: 999px; border: 1.5px solid var(--linea); font: 700 14px/1 var(--cuerpo); letter-spacing: .06em; text-decoration: none; transition: border-color .3s, background .3s; }
+.idioma:hover, .idioma:focus-visible { border-color: var(--tinta); background: #fff; }
 .menu a {
   display: inline-flex; align-items: baseline; gap: 5px;
   padding: 8px 12px; border-radius: 999px;
@@ -131,9 +134,10 @@ p { margin: 0; }
   gap: clamp(24px, 4vw, 64px); align-items: center;
   width: min(1200px, calc(100% - 40px)); margin-inline: auto;
 }
-.heroe h1 { font-size: clamp(46px, 7.4vw, 104px); }
+.heroe h1 { font-size: clamp(42px, 6.2vw, 88px); }
+.heroe-rol { margin-top: 20px; font: 700 14px/1.5 var(--cuerpo); letter-spacing: .08em; text-transform: uppercase; color: var(--acento-texto); }
 .heroe h1 em { display: block; }
-.heroe-lead { margin-top: 26px; max-width: 34em; font-size: clamp(17px, 1.5vw, 19px); color: #3b3731; }
+.heroe-lead { margin-top: 14px; max-width: 34em; font-size: clamp(17px, 1.5vw, 19px); color: #3b3731; }
 .heroe-lead strong { color: var(--texto); font-weight: 600; }
 .heroe-acciones { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
 .cifras { display: flex; gap: clamp(20px, 4vw, 48px); margin: 40px 0 0; padding-top: 24px; border-top: 1px solid var(--linea); }
@@ -277,6 +281,44 @@ p { margin: 0; }
 .t-banner > img { aspect-ratio: 2 / 1; height: 100%; }
 .tarjeta-pie-fila { padding: 28px clamp(24px, 3vw, 44px); }
 
+/* 01 · para la iglesia */
+.iglesia { margin-top: clamp(72px, 9vw, 120px); padding-top: clamp(40px, 5vw, 64px); border-top: 1.5px solid var(--tinta); }
+.iglesia-cabeza { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 12px clamp(24px, 4vw, 56px); align-items: end; margin-bottom: clamp(32px, 4vw, 48px); }
+.iglesia-cabeza .pre { grid-column: 1 / -1; }
+.iglesia-cabeza h3 { font-size: clamp(32px, 4vw, 54px); }
+.iglesia-cabeza p:last-child { color: var(--gris); font-size: 17px; }
+.serie { margin: 0 0 20px; padding: clamp(20px, 3vw, 32px); background: #3a2a1c; background-image: radial-gradient(120% 90% at 50% 0%, #5a4029 0%, #2b1f15 70%); border-radius: var(--radio); color: var(--claro); }
+.serie-lista { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 14px; }
+.serie-lista li { display: flex; flex-direction: column; gap: 10px; }
+.serie-lista span { font: 700 12px/1.3 var(--cuerpo); letter-spacing: .04em; color: #f1dcb9; }
+.serie .afiche img { aspect-ratio: 360 / 563; }
+.serie figcaption { margin-top: 18px; font-size: 15px; color: rgba(246, 242, 234, .8); }
+.serie figcaption b { color: var(--claro); }
+.iglesia-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 20px; }
+.ig-tarjeta { margin: 0; display: flex; flex-direction: column; background: #fff; border: 1px solid var(--linea); border-radius: var(--radio); overflow: hidden; }
+.ig-pie { padding: 18px 22px 22px; }
+.ig-pie h4 { margin: 0 0 6px; font: 800 22px/1.1 var(--display); letter-spacing: -0.03em; }
+.ig-pie p { color: var(--gris); font-size: 15.5px; }
+.ig-tarjeta .afiche { box-shadow: none; border-radius: 0; }
+.ig-tarjeta .afiche img, .escudos .afiche img, .flyers .afiche img { aspect-ratio: auto; height: auto; }
+.ig-escudos { grid-column: span 7; }
+.escudos { flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; align-items: center; padding: 18px 18px 0; }
+.escudos .afiche { background: #fff; border-radius: 16px; }
+.ig-mapa { grid-column: span 5; grid-row: span 2; background: #efe3c8; }
+.ig-mapa .afiche { flex: 1; min-height: 0; }
+.ig-mapa .afiche img { width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; object-position: top; }
+.ig-mapa .ig-pie { background: var(--papel); }
+.ig-flyers { grid-column: span 7; background: var(--tinta); color: var(--claro); border: 0; }
+.ig-flyers .ig-pie p { color: var(--claro-2); }
+.flyers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: end; padding: 22px 22px 4px; }
+.flyers .afiche { border-radius: 10px; box-shadow: 0 16px 30px -16px rgba(0, 0, 0, .9); }
+.flyers .afiche:nth-child(odd) { translate: 0 -10px; }
+.ig-ropa { grid-column: span 6; background: #f4f1ea; }
+.ig-ropa .afiche { cursor: zoom-in; }
+.ig-intro { grid-column: span 6; padding: 0; background: var(--tinta); border: 0; }
+.ig-intro video { border-radius: 0; box-shadow: none; }
+.ig-intro figcaption { margin: 0; padding: 16px 22px 20px; }
+
 /* 02 · riel de Shorts */
 .riel { margin-bottom: clamp(56px, 7vw, 96px); }
 .riel-pista {
@@ -324,18 +366,8 @@ p { margin: 0; }
 .foto-tarjeta { margin: 0; display: flex; flex-direction: column; gap: 14px; }
 .foto-tarjeta figcaption { font-size: 15.5px; color: var(--gris); }
 .foto-tarjeta figcaption b { color: var(--texto); }
-.f-recorte { grid-column: span 4; }
-.recorte {
-  flex: 1; min-height: 340px; border-radius: var(--radio); overflow: hidden; display: flex; align-items: flex-end; justify-content: center;
-  background: var(--acento);
-  background-image: linear-gradient(45deg, rgba(255, 255, 255, .14) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, .14) 75%), linear-gradient(45deg, rgba(255, 255, 255, .14) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, .14) 75%);
-  background-size: 28px 28px; background-position: 0 0, 14px 14px;
-  transition: background-color .5s;
-}
-.recorte img { width: 78%; }
-.recorte[data-fondo="1"] { background-color: #1f4339; }
-.recorte[data-fondo="2"] { background-color: #2e4a8b; }
-.recorte[data-fondo="3"] { background-color: #d9a441; }
+.f-integrada { grid-column: span 4; }
+.f-integrada .afiche { width: 100%; border-radius: var(--radio); }
 .f-montaje { grid-column: span 4; }
 .f-montaje .afiche { width: 100%; border-radius: var(--radio); }
 .f-miniaturas { grid-column: span 4; }
@@ -473,9 +505,9 @@ p { margin: 0; }
 .pie a { color: var(--claro); }
 
 /* visor de afiches */
-.visor { padding: 0; border: 0; background: transparent; max-width: min(92vw, 640px); max-height: 92vh; overflow: visible; }
+.visor { padding: 0; border: 0; background: transparent; max-width: min(92vw, 1100px); max-height: 92vh; overflow: visible; }
 .visor::backdrop { background: rgba(14, 12, 16, .86); backdrop-filter: blur(6px); }
-.visor img { max-height: 88vh; width: auto; border-radius: 14px; box-shadow: 0 40px 80px rgba(0, 0, 0, .6); }
+.visor img { max-height: 88vh; max-width: 92vw; height: auto; width: auto; border-radius: 14px; box-shadow: 0 40px 80px rgba(0, 0, 0, .6); }
 .visor-cerrar { position: absolute; top: -14px; right: -14px; z-index: 1; background: var(--claro); color: var(--tinta); border-color: var(--claro); width: 44px; height: 44px; }
 .visor[open] { animation: visor .35s cubic-bezier(.2, .8, .2, 1); }
 @keyframes visor { from { opacity: 0; scale: .94; } }
@@ -508,10 +540,15 @@ p { margin: 0; }
   .area-cabeza { grid-template-columns: 1fr; align-items: start; }
   .area-n { font-size: 84px; }
   .bento > .tarjeta { grid-column: span 12; }
+  .iglesia-cabeza { grid-template-columns: 1fr; }
+  .serie-lista { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; scrollbar-width: thin; }
+  .serie-lista li { flex: 0 0 40vw; max-width: 200px; scroll-snap-align: start; }
+  .iglesia-grid > * { grid-column: span 12; grid-row: auto; }
+  .ig-mapa .afiche img { aspect-ratio: 2 / 3; height: auto; }
   .t-banner { grid-template-columns: 1fr; }
   .video-duo, .destacado, .aprendiendo-in { grid-template-columns: 1fr; }
   .foto-grid > * { grid-column: span 12; }
-  .f-montaje .afiche { max-width: 420px; }
+  .f-montaje .afiche, .f-integrada .afiche { max-width: 420px; }
   .foto-lista { grid-template-columns: 1fr; }
   .ia-grid { grid-template-columns: 1fr 1fr; }
   .ia-imagen { grid-column: span 2; grid-row: auto; }
@@ -545,6 +582,9 @@ p { margin: 0; }
   .fm-lienzo { height: 280px; }
   .riel-pista li { flex-basis: 64vw; }
   .linea-fotos { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .flyers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flyers .afiche:nth-child(odd) { translate: none; }
+  .idioma { min-width: 40px; height: 36px; padding: 0 8px; font-size: 13px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

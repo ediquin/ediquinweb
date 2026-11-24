@@ -1,8 +1,9 @@
 /* Portafolio de ediquin · 24/11/2026. Sin librerías.
    Barra de progreso y sección activa · collage con paralaje · vista previa del índice ·
-   riel de Shorts con vistas previas · animación de Kauxte con pausa · visor de afiches · cambio de fondo del recorte. */
+   riel de Shorts con vistas previas · animación de Kauxte con pausa · visor de imágenes. Textos en español o inglés según <html lang>. */
 (() => {
   'use strict';
+  const en = document.documentElement.lang === 'en';
   const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ahorro = !!(navigator.connection && navigator.connection.saveData);
   const conMouse = matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -112,7 +113,7 @@
     let aLaVista = false;
     const pintar = () => {
       fig.classList.toggle('en-pausa', v.paused);
-      b.setAttribute('aria-label', v.paused ? 'Reproducir la animación' : 'Pausar la animación');
+      b.setAttribute('aria-label', en ? (v.paused ? 'Play the animation' : 'Pause the animation') : (v.paused ? 'Reproducir la animación' : 'Pausar la animación'));
     };
     const jugar = () => { if (!v.src) v.src = v.dataset.src; const p = v.play(); if (p && p.catch) p.catch(() => {}); };
     v.addEventListener('play', pintar);
@@ -130,7 +131,7 @@
     pintar();
   });
 
-  /* 6. visor de afiches */
+  /* 6. visor de imágenes (afiches, escudos, flyers): usa data-w y data-h si la imagen no es 2:3 */
   const visor = $('[data-visor]');
   if (visor && typeof visor.showModal === 'function') {
     // la imagen se crea al abrir: así no queda un <img> vacío en la página
@@ -141,6 +142,7 @@
     $$('[data-grande]').forEach(btn => btn.addEventListener('click', () => {
       origen = btn;
       if (!creada) { visor.append(img); creada = true; }
+      img.width = +btn.dataset.w || 900; img.height = +btn.dataset.h || 1350;
       img.src = btn.dataset.grande;
       img.alt = btn.dataset.alt || '';
       visor.showModal();
@@ -152,11 +154,4 @@
     $$('[data-grande]').forEach(btn => btn.addEventListener('click', () => { location.href = btn.dataset.grande; }));
   }
 
-  /* 7. recorte: cambiar el color de fondo demuestra que la foto está bien recortada */
-  const recorte = $('[data-recorte]');
-  const cambiar = $('[data-recorte-fondo]');
-  if (recorte && cambiar) {
-    let n = 0;
-    cambiar.addEventListener('click', () => { n = (n + 1) % 4; if (n) recorte.dataset.fondo = n; else delete recorte.dataset.fondo; });
-  }
 })();
