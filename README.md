@@ -56,6 +56,13 @@ node herramientas/qa_portafolio.mjs http://localhost:8093/ /tmp/qa-portafolio
   - `kauxte-3d` «deformada» es un falso positivo, porque la tarjeta está girada;
   - el retrato original mide solo 334 px y se ve suave en pantallas de alta densidad. Hace falta una foto de mejor resolución para reemplazar `img/perfil.png`.
 
+### Publicación (24/11/2026)
+
+- Con el visto bueno del titular, `rediseno-2026-11` se fusionó en `master` sin conflictos y se subió a GitHub (commit `ec33fc5`). GitHub Pages lo construyó sin errores.
+- **En vivo:** responden con 200 la página, el CSS, el JS, las fuentes, los videos (y con 206 los pedidos parciales) y las cuatro páginas de `nativzar-mj/`.
+- **`qa_portafolio.mjs` sobre https://ediquin.github.io/ediquinweb/: 28 bien, 0 mal.** La primera pasada marcó una vista previa de Short como fallida. Era la prueba cancelando la descarga al quitar el mouse (`ERR_ABORTED`), así que la prueba ahora ignora esas cancelaciones de video.
+- **Para revertir:** `git revert ec33fc5` y subir, o volver `master` a `b31a30a`.
+
 ### Pendiente del titular
 
 - Revisar los textos y datos de la trayectoria (fechas, docencia y cursos) y corregir lo que haga falta.

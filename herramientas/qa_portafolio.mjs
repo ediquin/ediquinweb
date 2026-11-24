@@ -18,7 +18,7 @@ for (const [w, h] of [[390, 844], [768, 1024], [1440, 900]]) {
   const errores = [];
   p.on('console', m => { if (m.type() === 'error') errores.push(m.text()); });
   p.on('pageerror', e => errores.push(String(e)));
-  p.on('requestfailed', r => errores.push('falló ' + r.url()));
+  p.on('requestfailed', r => { const t = (r.failure() || {}).errorText || ''; if (r.resourceType() === 'media' && t.includes('ERR_ABORTED')) return; errores.push('falló ' + r.url() + ' ' + t); });
   p.on('response', r => { if (r.status() >= 400) errores.push(r.status() + ' ' + r.url()); });
   await p.setViewport({ width: w, height: h, isMobile: w < 500, hasTouch: w < 500 });
   await p.goto(URL_, { waitUntil: 'networkidle0' });
