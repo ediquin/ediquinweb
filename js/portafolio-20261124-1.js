@@ -1,0 +1,162 @@
+/* Portafolio de ediquin · 24/11/2026. Sin librerías.
+   Barra de progreso y sección activa · collage con paralaje · vista previa del índice ·
+   riel de Shorts con vistas previas · animación de Kauxte con pausa · visor de afiches · cambio de fondo del recorte. */
+(() => {
+  'use strict';
+  const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ahorro = !!(navigator.connection && navigator.connection.saveData);
+  const conMouse = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+  /* 1. progreso de lectura y sección activa en el menú */
+  const barra = $('[data-progreso]');
+  const enlaces = $$('.menu a');
+  const secciones = enlaces.map(a => $(a.getAttribute('href'))).filter(Boolean);
+  let pendiente = false;
+  const alDesplazar = () => {
+    pendiente = false;
+    const h = document.documentElement;
+    const p = h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight);
+    if (barra) barra.style.transform = `scaleX(${p.toFixed(4)})`;
+    const y = innerHeight * 0.35;
+    let activa = -1;
+    secciones.forEach((s, i) => { if (s.getBoundingClientRect().top <= y) activa = i; });
+    enlaces.forEach((a, i) => { if (i === activa) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+  };
+  addEventListener('scroll', () => { if (!pendiente) { pendiente = true; requestAnimationFrame(alDesplazar); } }, { passive: true });
+  alDesplazar();
+
+  /* 2. collage del héroe: las piezas siguen al puntero con distinta profundidad */
+  const collage = $('[data-collage]');
+  if (collage && conMouse && !reducir) {
+    const piezas = $$('[data-prof]', collage);
+    collage.addEventListener('pointermove', e => {
+      const r = collage.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      piezas.forEach(p => { const k = +p.dataset.prof * 14; p.style.transform = `translate(${(x * k).toFixed(1)}px, ${(y * k).toFixed(1)}px)`; });
+    });
+    collage.addEventListener('pointerleave', () => piezas.forEach(p => { p.style.transform = ''; }));
+  }
+
+  /* 3. índice: imagen de muestra que sigue al puntero */
+  const vista = $('[data-indice-vista]');
+  const indice = $('[data-indice]');
+  if (vista && indice && conMouse && !reducir) {
+    let vx = 0, vy = 0, tx = 0, ty = 0, anim = 0;
+    const mover = () => {
+      vx += (tx - vx) * 0.18; vy += (ty - vy) * 0.18;
+      vista.style.transform = `translate(${vx.toFixed(1)}px, ${vy.toFixed(1)}px) rotate(${((tx - vx) * 0.04).toFixed(2)}deg)`;
+      anim = Math.abs(tx - vx) + Math.abs(ty - vy) > 0.5 ? requestAnimationFrame(mover) : 0;
+    };
+    $$('a[data-vista]', indice).forEach(a => {
+      a.addEventListener('pointerenter', () => { vista.src = a.dataset.vista; vista.classList.add('visible'); });
+    });
+    indice.addEventListener('pointermove', e => {
+      tx = e.clientX + 28; ty = e.clientY - 150;
+      if (!vista.classList.contains('visible')) { vx = tx; vy = ty; }
+      if (!anim) anim = requestAnimationFrame(mover);
+    });
+    indice.addEventListener('pointerleave', () => vista.classList.remove('visible'));
+  }
+
+  /* 4. riel de Shorts: vista previa muda al pasar el mouse (escritorio) o en la tarjeta más visible (celular) */
+  const pista = $('[data-riel-pista]');
+  if (pista) {
+    const tarjetas = $$('.short', pista);
+    const sePuede = !reducir && !ahorro;
+    const jugar = t => {
+      if (!sePuede) return;
+      const v = $('video', t);
+      if (!v.src) { v.src = v.dataset.src; }
+      const p = v.play(); if (p && p.catch) p.catch(() => {});
+      t.classList.add('reproduce');
+    };
+    const parar = t => { const v = $('video', t); if (!v.paused) v.pause(); t.classList.remove('reproduce'); };
+    if (conMouse) {
+      tarjetas.forEach(t => {
+        t.addEventListener('pointerenter', () => jugar(t));
+        t.addEventListener('pointerleave', () => parar(t));
+        t.addEventListener('focus', () => jugar(t));
+        t.addEventListener('blur', () => parar(t));
+      });
+    } else if ('IntersectionObserver' in window) {
+      // en táctil: solo la tarjeta que está casi entera a la vista reproduce
+      const io = new IntersectionObserver(entradas => {
+        entradas.forEach(e => (e.intersectionRatio > 0.9 ? jugar : parar)(e.target));
+      }, { root: pista, threshold: [0, 0.9] });
+      const ioPagina = new IntersectionObserver(([e]) => {
+        tarjetas.forEach(t => (e.isIntersecting ? io.observe(t) : (io.unobserve(t), parar(t))));
+      }, { threshold: 0.3 });
+      ioPagina.observe(pista);
+    }
+    const ant = $('[data-riel-ant]'), sig = $('[data-riel-sig]');
+    const paso = () => (tarjetas[0].getBoundingClientRect().width + 18) * (innerWidth > 860 ? 2 : 1);
+    const actualizar = () => {
+      if (ant) ant.disabled = pista.scrollLeft < 8;
+      if (sig) sig.disabled = pista.scrollLeft + pista.clientWidth > pista.scrollWidth - 8;
+    };
+    if (ant) ant.addEventListener('click', () => pista.scrollBy({ left: -paso(), behavior: reducir ? 'auto' : 'smooth' }));
+    if (sig) sig.addEventListener('click', () => pista.scrollBy({ left: paso(), behavior: reducir ? 'auto' : 'smooth' }));
+    pista.addEventListener('scroll', actualizar, { passive: true });
+    addEventListener('resize', actualizar);
+    actualizar();
+  }
+
+  /* 5. animación de Kauxte: se reproduce sola mientras está a la vista; botón de pausa (WCAG 2.2.2) */
+  $$('[data-video-auto]').forEach(fig => {
+    const v = $('video', fig);
+    const b = $('[data-video-pausa]', fig);
+    let elegida = reducir || ahorro;
+    let aLaVista = false;
+    const pintar = () => {
+      fig.classList.toggle('en-pausa', v.paused);
+      b.setAttribute('aria-label', v.paused ? 'Reproducir la animación' : 'Pausar la animación');
+    };
+    const jugar = () => { if (!v.src) v.src = v.dataset.src; const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+    v.addEventListener('play', pintar);
+    v.addEventListener('pause', pintar);
+    b.addEventListener('click', () => { if (v.paused) { elegida = false; jugar(); } else { elegida = true; v.pause(); } });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([e]) => {
+        aLaVista = e.isIntersecting;
+        if (aLaVista && !elegida) jugar(); else if (!aLaVista && !v.paused) v.pause();
+      }, { threshold: 0.5 }).observe(v);
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) v.pause(); else if (aLaVista && !elegida) jugar();
+    });
+    pintar();
+  });
+
+  /* 6. visor de afiches */
+  const visor = $('[data-visor]');
+  if (visor && typeof visor.showModal === 'function') {
+    // la imagen se crea al abrir: así no queda un <img> vacío en la página
+    const img = document.createElement('img');
+    img.width = 900; img.height = 1350; img.alt = '';
+    let creada = false;
+    let origen = null;
+    $$('[data-grande]').forEach(btn => btn.addEventListener('click', () => {
+      origen = btn;
+      if (!creada) { visor.append(img); creada = true; }
+      img.src = btn.dataset.grande;
+      img.alt = btn.dataset.alt || '';
+      visor.showModal();
+    }));
+    visor.addEventListener('click', e => { if (e.target === visor) visor.close(); });
+    visor.addEventListener('close', () => { if (origen) origen.focus(); });
+  } else {
+    // sin <dialog>: el botón abre la imagen grande en la misma pestaña
+    $$('[data-grande]').forEach(btn => btn.addEventListener('click', () => { location.href = btn.dataset.grande; }));
+  }
+
+  /* 7. recorte: cambiar el color de fondo demuestra que la foto está bien recortada */
+  const recorte = $('[data-recorte]');
+  const cambiar = $('[data-recorte-fondo]');
+  if (recorte && cambiar) {
+    let n = 0;
+    cambiar.addEventListener('click', () => { n = (n + 1) % 4; if (n) recorte.dataset.fondo = n; else delete recorte.dataset.fondo; });
+  }
+})();
