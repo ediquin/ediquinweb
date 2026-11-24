@@ -1,6 +1,7 @@
 /* Portafolio de ediquin · 24/11/2026. Sin librerías.
    Barra de progreso y sección activa · collage con paralaje · vista previa del índice ·
-   riel de Shorts con vistas previas · animación de Kauxte con pausa · visor de imágenes. Textos en español o inglés según <html lang>. */
+   riel de Shorts con vistas previas · animación con pausa · visor de imágenes ·
+   carrusel de indumentaria · logo 3D de Nativzar (Three.js, se carga solo al acercarse). Textos en español o inglés según <html lang>. */
 (() => {
   'use strict';
   const en = document.documentElement.lang === 'en';
@@ -152,6 +153,50 @@
   } else {
     // sin <dialog>: el botón abre la imagen grande en la misma pestaña
     $$('[data-grande]').forEach(btn => btn.addEventListener('click', () => { location.href = btn.dataset.grande; }));
+  }
+
+
+  /* 7. carrusel de indumentaria: flechas que avanzan una prenda */
+  const ropa = $('[data-ropa-pista]');
+  if (ropa) {
+    const ant = $('[data-ropa-ant]'), sig = $('[data-ropa-sig]');
+    const mover = d => {
+      const li = $('li', ropa);
+      ropa.scrollBy({ left: d * (li ? li.getBoundingClientRect().width + 14 : 300), behavior: reducir ? 'auto' : 'smooth' });
+    };
+    const estado = () => {
+      ant.disabled = ropa.scrollLeft < 4;
+      sig.disabled = ropa.scrollLeft + ropa.clientWidth > ropa.scrollWidth - 4;
+    };
+    ant.addEventListener('click', () => mover(-1));
+    sig.addEventListener('click', () => mover(1));
+    ropa.addEventListener('scroll', estado, { passive: true });
+    addEventListener('resize', estado);
+    $$('img', ropa).forEach(i => i.addEventListener('load', estado));
+    estado();
+  }
+
+  /* 8. logo 3D de Nativzar: el módulo (Three.js, ~130 KB) se pide solo cuando la tarjeta se acerca a la pantalla.
+     Con «reducir movimiento», ahorro de datos o sin aceleración gráfica queda la imagen fija. */
+  const m3d = $('[data-montana3d]');
+  if (m3d && !reducir && !ahorro && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      import(new URL(m3d.dataset.montana3d, document.baseURI).href).then(mod => {
+        const vista = mod.montar(m3d);
+        const girar = $('[data-montana3d-girar]', m3d);
+        const pista = $('.montana3d-pista', m3d);
+        if (pista) pista.textContent = en ? 'Drag to rotate' : 'Arrastra para girar';
+        if (girar) {
+          girar.textContent = en ? 'Spin 360°' : 'Girar 360°';
+          girar.hidden = false;
+          girar.addEventListener('click', () => vista.girar());
+        }
+        m3d.addEventListener('pointerdown', () => m3d.classList.add('tocada'), { once: true });
+      }).catch(() => {});   // sin WebGL acelerado: se queda la imagen fija
+    }, { rootMargin: '300px 0px' });
+    io.observe(m3d);
   }
 
 })();

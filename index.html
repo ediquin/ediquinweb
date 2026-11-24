@@ -22,8 +22,8 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preload" href="fonts/bricolage-grotesque-800.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/dm-sans-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/portafolio-20261124-2.css">
-<script src="js/portafolio-20261124-2.js" defer></script>
+<link rel="stylesheet" href="css/portafolio-20261124-3.css">
+<script src="js/portafolio-20261124-3.js" defer></script>
 </head>
 <body>
 <a class="saltar" href="#contenido">Saltar al contenido</a>
@@ -53,8 +53,7 @@
 <section class="heroe" id="inicio" aria-labelledby="heroe-t">
   <div class="heroe-in">
     <div class="heroe-texto">
-      <p class="pre">Edilson Byron Laura Mercado · La Paz, Bolivia</p>
-      <h1 id="heroe-t">Ingeniero que diseña, programa <em>y crea con IA.</em></h1>
+      <h1 id="heroe-t">Edilson Byron <em>Laura Mercado</em></h1>
       <p class="heroe-rol">Ingeniero electrónico · Desarrollador full-stack · Automatización con IA</p>
       <p class="heroe-lead">Hice sitios para clientes como <strong>Cox Automotive</strong> en CodeRoad y enseñé en la universidad. Hoy uno la ingeniería con el diseño: <strong>afiches, identidades, videos, sitios web y flujos con agentes de IA</strong>, cuidando que cada pieza se vea bien y funcione.</p>
       <div class="heroe-acciones">
@@ -164,13 +163,17 @@
       </article>
 
       <article class="tarjeta t-nativzar revelar">
-        <div class="par">
-          <img src="img/2026/nativzar-logo-512.webp" width="512" height="512" loading="lazy" alt="Logo de Nativzar: montaña, sendero verde y cruz">
-          <img src="img/2026/nativzar-3d-480.webp" width="480" height="500" loading="lazy" alt="Versión 3D del logo de Nativzar">
+        <div class="n3d">
+          <figure class="montana3d" data-montana3d="js/montana3d-20261124-3.js">
+            <img src="img/2026/nativzar-3d-v2-480.webp" srcset="img/2026/nativzar-3d-v2-480.webp 480w, img/2026/nativzar-3d-v2-900.webp 900w" sizes="(max-width: 860px) 90vw, 40vw" width="480" height="480" loading="lazy" alt="Logo de Nativzar en 3D: una montaña de roca con el sendero verde tallado en zigzag hasta la cruz">
+            <p class="montana3d-pista" aria-hidden="true">Arrastra para girar</p>
+            <button type="button" class="montana3d-girar" data-montana3d-girar hidden>Girar 360°</button>
+          </figure>
+          <img class="n3d-logo" src="img/2026/nativzar-logo-oficial-512.webp" width="512" height="512" loading="lazy" alt="Logo oficial de Nativzar: montaña, sendero verde en zigzag, cruz y el nombre NATIVZAR">
         </div>
         <div class="tarjeta-pie">
           <h3>Nativzar: del logo al 3D</h3>
-          <p>El logo plano convertido en un diorama 3D interactivo (Three.js) para el sitio.</p>
+          <p>El logo oficial (abajo a la izquierda) convertido en una montaña 3D con Three.js. Arrástrala para verla por todos lados.</p>
         </div>
       </article>
 
@@ -206,37 +209,41 @@
       <div class="iglesia-grid">
         <article class="ig-tarjeta ig-escudos revelar">
           <div class="escudos">
-            <button type="button" class="afiche" data-grande="img/2026/escudo-cead-800.webp" data-alt="Escudo hexagonal del CEAD, curso de entrenamiento avanzado de directivas" data-w="800" data-h="800"><img src="img/2026/escudo-cead-400.webp" width="400" height="400" loading="lazy" alt="Escudo hexagonal del CEAD, curso de entrenamiento avanzado de directivas"></button>
+            <button type="button" class="afiche" data-grande="img/2026/parche-convencion-800.webp" data-alt="Parche de la Convención 2026 de la MBON: un niño orando sobre el mundo, con los emblemas de Aventureros, JA, Música y Conquistadores" data-w="800" data-h="838"><img src="img/2026/parche-convencion-400.webp" width="400" height="419" loading="lazy" alt="Parche de la Convención 2026 de la MBON: un niño orando sobre el mundo, con los emblemas de Aventureros, JA, Música y Conquistadores"></button>
             <button type="button" class="afiche" data-grande="img/2026/escudo-cead-liderazgo-800.webp" data-alt="Logo CEAD Liderazgo con dos conquistadores sobre una montaña" data-w="800" data-h="800"><img src="img/2026/escudo-cead-liderazgo-400.webp" width="400" height="400" loading="lazy" alt="Logo CEAD Liderazgo con dos conquistadores sobre una montaña"></button>
             <button type="button" class="afiche" data-grande="img/2026/escudo-gmm-800.webp" data-alt="Escudo del Curso de GMM y GMMA con el Illimani" data-w="800" data-h="800"><img src="img/2026/escudo-gmm-400.webp" width="400" height="400" loading="lazy" alt="Escudo del Curso de GMM y GMMA con el Illimani"></button>
           </div>
           <div class="ig-pie"><h4>Escudos y parches</h4><p>Insignias para cursos y campamentos, pensadas para bordarse: pocos colores, borde grueso y texto que se lee a 8 cm.</p></div>
         </article>
 
-        <article class="ig-tarjeta ig-mapa revelar">
-          <button type="button" class="afiche" data-grande="img/2026/conquisruta-900.webp" data-alt="Mapa ilustrado ConquisRuta de agosto de 2026" data-w="900" data-h="1350"><img src="img/2026/conquisruta-420.webp" width="420" height="630" loading="lazy" alt="Mapa ilustrado ConquisRuta de agosto de 2026"></button>
-          <div class="ig-pie"><h4>ConquisRuta</h4><p>Mapa ilustrado del mes: cada papiro es una actividad del club.</p></div>
-        </article>
-
         <article class="ig-tarjeta ig-flyers revelar">
           <div class="flyers">
             <button type="button" class="afiche" data-grande="img/2026/flyer-excursion-900.webp" data-alt="Afiche de la excursión del Día Mundial del Conquistador" data-w="900" data-h="1350"><img src="img/2026/flyer-excursion-420.webp" width="420" height="630" loading="lazy" alt="Afiche de la excursión del Día Mundial del Conquistador"></button>
             <button type="button" class="afiche" data-grande="img/2026/flyer-recepcion-900.webp" data-alt="Afiche de la Recepción de Sábado del Día Mundial del Conquistador" data-w="900" data-h="1350"><img src="img/2026/flyer-recepcion-420.webp" width="420" height="630" loading="lazy" alt="Afiche de la Recepción de Sábado del Día Mundial del Conquistador"></button>
-            <button type="button" class="afiche" data-grande="img/2026/flyer-campori-900.webp" data-alt="Flyer de la reunión informativa para el Camporí Regional" data-w="900" data-h="1125"><img src="img/2026/flyer-campori-420.webp" width="420" height="525" loading="lazy" alt="Flyer de la reunión informativa para el Camporí Regional"></button>
             <button type="button" class="afiche" data-grande="img/2026/flyer-dia-mundial-900.webp" data-alt="Afiche del Día Mundial del Conquistador del Club Central" data-w="900" data-h="1125"><img src="img/2026/flyer-dia-mundial-420.webp" width="420" height="525" loading="lazy" alt="Afiche del Día Mundial del Conquistador del Club Central"></button>
           </div>
-          <div class="ig-pie"><h4>Flyers de actividades</h4><p>Excursiones, reuniones y celebraciones, listos para WhatsApp el mismo día: fecha, hora y lugar primero.</p></div>
+          <div class="ig-pie"><h4>Flyers de actividades</h4><p>Excursiones, recepciones y celebraciones, listos para WhatsApp el mismo día: fecha, hora y lugar primero.</p></div>
         </article>
 
         <article class="ig-tarjeta ig-ropa revelar">
-          <button type="button" class="afiche afiche-ancho" data-grande="img/2026/polera-trazo-andino-1200.webp" data-alt="Polera Trazo Andino para coordinadores de la MBON, frente y espalda" data-w="1200" data-h="768"><img src="img/2026/polera-trazo-andino-640.webp" width="640" height="410" loading="lazy" alt="Polera Trazo Andino para coordinadores de la MBON, frente y espalda"></button>
-          <div class="ig-pie"><h4>Uniformes «Trazo andino»</h4><p>Poleras y conjunto deportivo para coordinadores de la MBON, con la cordillera como franja y tres paletas para elegir.</p></div>
+          <div class="ropa">
+            <ul class="ropa-pista" data-ropa-pista aria-label="Diseños de indumentaria">
+              <li><button type="button" class="afiche" data-grande="img/2026/ropa-polera-trazo-andino-1100.webp" data-alt="Polera «Trazo andino» para coordinadores de la MBON, frente y espalda, como prenda real" data-w="1100" data-h="733"><img src="img/2026/ropa-polera-trazo-andino-560.webp" width="560" height="373" style="aspect-ratio: 560 / 373" loading="lazy" alt="Polera «Trazo andino» para coordinadores de la MBON, frente y espalda, como prenda real"></button></li>
+              <li><button type="button" class="afiche" data-grande="img/2026/ropa-conjunto-v01-1100.webp" data-alt="Conjunto deportivo «Trazo andino»: rompevientos con la cordillera y pantalón, frente y espalda" data-w="1100" data-h="1375"><img src="img/2026/ropa-conjunto-v01-560.webp" width="560" height="700" style="aspect-ratio: 560 / 700" loading="lazy" alt="Conjunto deportivo «Trazo andino»: rompevientos con la cordillera y pantalón, frente y espalda"></button></li>
+              <li><button type="button" class="afiche" data-grande="img/2026/ropa-conjunto-salvia-1100.webp" data-alt="Conjunto «Trazo andino» en la paleta salvia y arena" data-w="1100" data-h="1375"><img src="img/2026/ropa-conjunto-salvia-560.webp" width="560" height="700" style="aspect-ratio: 560 / 700" loading="lazy" alt="Conjunto «Trazo andino» en la paleta salvia y arena"></button></li>
+              <li><button type="button" class="afiche" data-grande="img/2026/ropa-conjunto-petroleo-1100.webp" data-alt="Conjunto «Trazo andino» en la paleta petróleo y piedra, con franjas en el pantalón" data-w="1100" data-h="1375"><img src="img/2026/ropa-conjunto-petroleo-560.webp" width="560" height="700" style="aspect-ratio: 560 / 700" loading="lazy" alt="Conjunto «Trazo andino» en la paleta petróleo y piedra, con franjas en el pantalón"></button></li>
+              <li><button type="button" class="afiche" data-grande="img/2026/ropa-conjunto-granate-1100.webp" data-alt="Conjunto «Trazo andino» en la paleta granate y oliva" data-w="1100" data-h="1375"><img src="img/2026/ropa-conjunto-granate-560.webp" width="560" height="700" style="aspect-ratio: 560 / 700" loading="lazy" alt="Conjunto «Trazo andino» en la paleta granate y oliva"></button></li>
+            </ul>
+            <button type="button" class="redondo ropa-ant" data-ropa-ant aria-label="Diseño anterior"><svg class="ico" aria-hidden="true"><use href="#i-izq"/></svg></button>
+            <button type="button" class="redondo ropa-sig" data-ropa-sig aria-label="Diseño siguiente"><svg class="ico" aria-hidden="true"><use href="#i-der"/></svg></button>
+          </div>
+          <div class="ig-pie"><h4>Uniformes «Trazo andino»</h4><p>Polera y conjunto deportivo para coordinadores de la MBON, con la cordillera como franja y tres paletas para elegir. Desliza para ver cada diseño.</p></div>
         </article>
 
         <figure class="ig-tarjeta ig-intro pantalla-video revelar" data-video-auto>
-          <video muted playsinline loop preload="none" poster="img/2026/intro-conquis-640.webp" width="640" height="358" data-src="video/2026/intro-conquis-640.mp4" aria-label="Intro animada del club: conquistadores caminando por el bosque hacia el título Misión Boliviana Occidental Norte"></video>
+          <video muted playsinline loop preload="none" poster="img/2026/camino-elias-640.webp" width="640" height="360" data-src="video/2026/camino-elias-640.mp4" aria-label="Escena animada en 3D: un joven camina de espaldas por un sendero entre colinas verdes, con el texto «Un camino trazado por Dios mismo»"></video>
           <button type="button" class="redondo pausa" data-video-pausa aria-label="Pausar la animación"><svg class="ico i-pausa" aria-hidden="true"><use href="#i-pausa"/></svg><svg class="ico i-play" aria-hidden="true"><use href="#i-play"/></svg></button>
-          <figcaption><b>Intro animada para videos del club.</b> Ilustración animada y títulos en DaVinci Resolve, 6 s.</figcaption>
+          <figcaption><b>«Un camino trazado por Dios mismo».</b> Escena animada en Blender para el episodio de Elías del canal Nativzar, con textos escritos a mano en pantalla.</figcaption>
         </figure>
       </div>
     </div>
@@ -250,7 +257,7 @@
       <span class="area-n" aria-hidden="true">02</span>
       <div>
         <p class="pre">Video y animación</p>
-        <h2 id="video-t">Historias cortas que <em>se quedan.</em></h2>
+        <h2 id="video-t">Compartir el Mensaje, <em>un video a la vez.</em></h2>
       </div>
       <p class="area-intro">Escribo el guion, grabo o genero la voz, edito, animo y subtitulo. La serie <b>«Escrito antes de ser descubierto»</b> del canal Nativzar ya tiene siete capítulos.</p>
     </header>

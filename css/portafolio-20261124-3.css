@@ -256,7 +256,7 @@ p { margin: 0; }
 .tarjeta-pie { padding: 22px 24px 26px; }
 .tarjeta-pie h3 { font-size: 24px; margin-bottom: 8px; }
 .tarjeta-pie p { color: var(--gris); font-size: 16px; }
-.t-afiches { grid-column: span 7; grid-row: span 2; background: var(--tinta); color: var(--claro); border: 0; }
+.t-afiches { grid-column: span 7; background: var(--tinta); color: var(--claro); border: 0; }
 .t-afiches .tarjeta-pie p { color: var(--claro-2); }
 .afiches { display: flex; justify-content: center; align-items: center; padding: clamp(28px, 4vw, 48px) 24px 8px; flex: 1; }
 .afiche {
@@ -273,10 +273,22 @@ p { margin: 0; }
 .t-kauxte { grid-column: span 5; background: #132a24; color: var(--claro); border: 0; }
 .t-kauxte .tarjeta-pie p { color: var(--claro-2); }
 .t-kauxte > img { object-fit: contain; background: #132a24; }
-.t-nativzar { grid-column: span 5; }
-.par { display: grid; grid-template-columns: 1fr 1fr; background: linear-gradient(180deg, #f7f4ee, #ece6d9); }
-.par { align-items: center; }
-.par img { width: 100%; padding: 10px; }
+.t-nativzar { grid-column: span 12; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: center; }
+.t-nativzar .tarjeta-pie { padding: 32px clamp(24px, 3vw, 44px); }
+.t-nativzar .tarjeta-pie h3 { font-size: clamp(26px, 2.6vw, 34px); }
+.n3d { position: relative; background: radial-gradient(90% 80% at 50% 35%, #fbf8f2 0%, #efe9dd 100%); }
+.montana3d { position: relative; margin: 0; aspect-ratio: 6 / 5; }
+.montana3d > img { width: 100%; height: 100%; object-fit: contain; transition: opacity .6s ease; }
+.montana3d-canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .6s ease; touch-action: pan-y; cursor: grab; }
+.montana3d.is-3d .montana3d-canvas { opacity: 1; }
+.montana3d.is-3d > img { opacity: 0; }
+.montana3d.arrastrando .montana3d-canvas { cursor: grabbing; }
+.montana3d-pista { z-index: 2; position: absolute; left: 50%; top: 14px; translate: -50% 0; margin: 0; padding: 4px 12px; border-radius: 99px; background: rgba(22, 20, 26, .72); color: var(--claro); font: 600 13px/1.4 var(--cuerpo); opacity: 0; transition: opacity .4s ease; pointer-events: none; white-space: nowrap; }
+.montana3d.is-3d .montana3d-pista { opacity: 1; }
+.montana3d.tocada .montana3d-pista { opacity: 0; }
+.montana3d-girar { z-index: 2; position: absolute; right: 14px; bottom: 14px; padding: 8px 14px; border: 1.5px solid var(--tinta); border-radius: 99px; background: var(--claro); color: var(--tinta); font: 700 14px/1 var(--cuerpo); cursor: pointer; }
+.montana3d-girar:hover { background: var(--tinta); color: var(--claro); }
+.n3d-logo { z-index: 2; position: absolute; left: 14px; bottom: 14px; width: 26%; max-width: 130px; border-radius: 12px; box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .45); background: #f4f2ee; }
 .t-banner { grid-column: span 12; display: grid; grid-template-columns: 1.6fr 1fr; align-items: center; }
 .t-banner > img { aspect-ratio: 2 / 1; height: 100%; }
 .tarjeta-pie-fila { padding: 28px clamp(24px, 3vw, 44px); }
@@ -301,21 +313,24 @@ p { margin: 0; }
 .ig-pie p { color: var(--gris); font-size: 15.5px; }
 .ig-tarjeta .afiche { box-shadow: none; border-radius: 0; }
 .ig-tarjeta .afiche img, .escudos .afiche img, .flyers .afiche img { aspect-ratio: auto; height: auto; }
-.ig-escudos { grid-column: span 7; }
+.ig-escudos { grid-column: span 6; }
 .escudos { flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; align-items: center; padding: 18px 18px 0; }
 .escudos .afiche { background: #fff; border-radius: 16px; }
-.ig-mapa { grid-column: span 5; grid-row: span 2; background: #efe3c8; }
-.ig-mapa .afiche { flex: 1; min-height: 0; }
-.ig-mapa .afiche img { width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; object-position: top; }
-.ig-mapa .ig-pie { background: var(--papel); }
-.ig-flyers { grid-column: span 7; background: var(--tinta); color: var(--claro); border: 0; }
+.ig-flyers { grid-column: span 6; background: var(--tinta); color: var(--claro); border: 0; }
 .ig-flyers .ig-pie p { color: var(--claro-2); }
-.flyers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: end; padding: 22px 22px 4px; }
+.flyers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: end; padding: 22px 22px 4px; }
 .flyers .afiche { border-radius: 10px; box-shadow: 0 16px 30px -16px rgba(0, 0, 0, .9); }
 .flyers .afiche:nth-child(odd) { translate: 0 -10px; }
-.ig-ropa { grid-column: span 6; background: #f4f1ea; }
-.ig-ropa .afiche { cursor: zoom-in; }
-.ig-intro { grid-column: span 6; padding: 0; background: var(--tinta); border: 0; }
+.ig-ropa { grid-column: span 7; background: #e9e3e3; }
+.ropa { position: relative; flex: 1; }
+.ropa-pista { list-style: none; margin: 0; padding: 18px; display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: thin; }
+.ropa-pista li { flex: none; scroll-snap-align: center; }
+.ropa-pista .afiche { display: block; height: clamp(240px, 26vw, 360px); border-radius: 12px; box-shadow: 0 14px 30px -18px rgba(0, 0, 0, .6); }
+.ropa-pista .afiche img { width: auto; height: 100%; aspect-ratio: auto; }
+.ropa .redondo { position: absolute; top: 50%; translate: 0 -50%; width: 44px; height: 44px; background: rgba(246, 242, 234, .92); }
+.ropa-ant { left: 10px; }
+.ropa-sig { right: 10px; }
+.ig-intro { grid-column: span 5; padding: 0; background: var(--tinta); border: 0; }
 .ig-intro video { border-radius: 0; box-shadow: none; }
 .ig-intro figcaption { margin: 0; padding: 16px 22px 20px; }
 
@@ -540,11 +555,11 @@ p { margin: 0; }
   .area-cabeza { grid-template-columns: 1fr; align-items: start; }
   .area-n { font-size: 84px; }
   .bento > .tarjeta { grid-column: span 12; }
+  .t-nativzar { grid-template-columns: 1fr; }
   .iglesia-cabeza { grid-template-columns: 1fr; }
   .serie-lista { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; scrollbar-width: thin; }
   .serie-lista li { flex: 0 0 40vw; max-width: 200px; scroll-snap-align: start; }
   .iglesia-grid > * { grid-column: span 12; grid-row: auto; }
-  .ig-mapa .afiche img { aspect-ratio: 2 / 3; height: auto; }
   .t-banner { grid-template-columns: 1fr; }
   .video-duo, .destacado, .aprendiendo-in { grid-template-columns: 1fr; }
   .foto-grid > * { grid-column: span 12; }
@@ -582,8 +597,7 @@ p { margin: 0; }
   .fm-lienzo { height: 280px; }
   .riel-pista li { flex-basis: 64vw; }
   .linea-fotos { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-  .flyers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .flyers .afiche:nth-child(odd) { translate: none; }
+  .flyers { gap: 8px; padding: 18px 14px 4px; }
   .idioma { min-width: 40px; height: 36px; padding: 0 8px; font-size: 13px; }
 }
 

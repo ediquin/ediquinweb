@@ -23,8 +23,8 @@
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="preload" href="../fonts/bricolage-grotesque-800.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../fonts/dm-sans-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../css/portafolio-20261124-2.css">
-<script src="../js/portafolio-20261124-2.js" defer></script>
+<link rel="stylesheet" href="../css/portafolio-20261124-3.css">
+<script src="../js/portafolio-20261124-3.js" defer></script>
 </head>
 <body>
 <a class="saltar" href="#contenido">Skip to content</a>
@@ -54,8 +54,7 @@
 <section class="heroe" id="inicio" aria-labelledby="heroe-t">
   <div class="heroe-in">
     <div class="heroe-texto">
-      <p class="pre">Edilson Byron Laura Mercado · La Paz, Bolivia</p>
-      <h1 id="heroe-t">An engineer who designs, codes <em>and creates with AI.</em></h1>
+      <h1 id="heroe-t">Edilson Byron <em>Laura Mercado</em></h1>
       <p class="heroe-rol">Electronics engineer · Full-stack developer · AI automation</p>
       <p class="heroe-lead">I built websites for clients such as <strong>Cox Automotive</strong> at CodeRoad and taught at university. Today I bring engineering and design together: <strong>posters, brand identities, videos, websites and AI agent workflows</strong>, making sure every piece looks good and works.</p>
       <div class="heroe-acciones">
@@ -165,13 +164,17 @@
       </article>
 
       <article class="tarjeta t-nativzar revelar">
-        <div class="par">
-          <img src="../img/2026/nativzar-logo-512.webp" width="512" height="512" loading="lazy" alt="Nativzar logo: mountain, green path and cross">
-          <img src="../img/2026/nativzar-3d-480.webp" width="480" height="500" loading="lazy" alt="3D version of the Nativzar logo">
+        <div class="n3d">
+          <figure class="montana3d" data-montana3d="../js/montana3d-20261124-3.js">
+            <img src="../img/2026/nativzar-3d-v2-480.webp" srcset="../img/2026/nativzar-3d-v2-480.webp 480w, ../img/2026/nativzar-3d-v2-900.webp 900w" sizes="(max-width: 860px) 90vw, 40vw" width="480" height="480" loading="lazy" alt="Nativzar logo in 3D: a rock mountain with the green path carved in a zigzag up to the cross">
+            <p class="montana3d-pista" aria-hidden="true">Drag to rotate</p>
+            <button type="button" class="montana3d-girar" data-montana3d-girar hidden>Spin 360°</button>
+          </figure>
+          <img class="n3d-logo" src="../img/2026/nativzar-logo-oficial-512.webp" width="512" height="512" loading="lazy" alt="Official Nativzar logo: mountain, green zigzag path, cross and the name NATIVZAR">
         </div>
         <div class="tarjeta-pie">
           <h3>Nativzar: from logo to 3D</h3>
-          <p>The flat logo turned into an interactive 3D diorama (Three.js) for the website.</p>
+          <p>The official logo (bottom left) turned into a 3D mountain with Three.js. Drag it to see it from every side.</p>
         </div>
       </article>
 
@@ -207,37 +210,41 @@
       <div class="iglesia-grid">
         <article class="ig-tarjeta ig-escudos revelar">
           <div class="escudos">
-            <button type="button" class="afiche" data-grande="../img/2026/escudo-cead-800.webp" data-alt="Hexagonal badge for CEAD, an advanced leadership training course" data-w="800" data-h="800"><img src="../img/2026/escudo-cead-400.webp" width="400" height="400" loading="lazy" alt="Hexagonal badge for CEAD, an advanced leadership training course"></button>
+            <button type="button" class="afiche" data-grande="../img/2026/parche-convencion-800.webp" data-alt="Patch for the MBON 2026 Convention: a boy praying over the world, with the Adventurers, Youth, Music and Pathfinders emblems" data-w="800" data-h="838"><img src="../img/2026/parche-convencion-400.webp" width="400" height="419" loading="lazy" alt="Patch for the MBON 2026 Convention: a boy praying over the world, with the Adventurers, Youth, Music and Pathfinders emblems"></button>
             <button type="button" class="afiche" data-grande="../img/2026/escudo-cead-liderazgo-800.webp" data-alt="CEAD Leadership logo with two Pathfinders on a mountain" data-w="800" data-h="800"><img src="../img/2026/escudo-cead-liderazgo-400.webp" width="400" height="400" loading="lazy" alt="CEAD Leadership logo with two Pathfinders on a mountain"></button>
             <button type="button" class="afiche" data-grande="../img/2026/escudo-gmm-800.webp" data-alt="Badge for the GMM and GMMA course with Mount Illimani" data-w="800" data-h="800"><img src="../img/2026/escudo-gmm-400.webp" width="400" height="400" loading="lazy" alt="Badge for the GMM and GMMA course with Mount Illimani"></button>
           </div>
           <div class="ig-pie"><h4>Badges and patches</h4><p>Badges for courses and camps, made to be embroidered: few colours, a thick border and text you can read at 8 cm.</p></div>
         </article>
 
-        <article class="ig-tarjeta ig-mapa revelar">
-          <button type="button" class="afiche" data-grande="../img/2026/conquisruta-900.webp" data-alt="Illustrated ConquisRuta map for August 2026" data-w="900" data-h="1350"><img src="../img/2026/conquisruta-420.webp" width="420" height="630" loading="lazy" alt="Illustrated ConquisRuta map for August 2026"></button>
-          <div class="ig-pie"><h4>ConquisRuta</h4><p>An illustrated map of the month: each scroll is a club activity.</p></div>
-        </article>
-
         <article class="ig-tarjeta ig-flyers revelar">
           <div class="flyers">
             <button type="button" class="afiche" data-grande="../img/2026/flyer-excursion-900.webp" data-alt="Poster for the World Pathfinder Day hike" data-w="900" data-h="1350"><img src="../img/2026/flyer-excursion-420.webp" width="420" height="630" loading="lazy" alt="Poster for the World Pathfinder Day hike"></button>
             <button type="button" class="afiche" data-grande="../img/2026/flyer-recepcion-900.webp" data-alt="Poster for the Sabbath welcome on World Pathfinder Day" data-w="900" data-h="1350"><img src="../img/2026/flyer-recepcion-420.webp" width="420" height="630" loading="lazy" alt="Poster for the Sabbath welcome on World Pathfinder Day"></button>
-            <button type="button" class="afiche" data-grande="../img/2026/flyer-campori-900.webp" data-alt="Flyer for the Regional Camporee information meeting" data-w="900" data-h="1125"><img src="../img/2026/flyer-campori-420.webp" width="420" height="525" loading="lazy" alt="Flyer for the Regional Camporee information meeting"></button>
             <button type="button" class="afiche" data-grande="../img/2026/flyer-dia-mundial-900.webp" data-alt="Club Central poster for World Pathfinder Day" data-w="900" data-h="1125"><img src="../img/2026/flyer-dia-mundial-420.webp" width="420" height="525" loading="lazy" alt="Club Central poster for World Pathfinder Day"></button>
           </div>
-          <div class="ig-pie"><h4>Activity flyers</h4><p>Hikes, meetings and celebrations, ready for WhatsApp the same day: date, time and place first.</p></div>
+          <div class="ig-pie"><h4>Activity flyers</h4><p>Hikes, welcomes and celebrations, ready for WhatsApp the same day: date, time and place first.</p></div>
         </article>
 
         <article class="ig-tarjeta ig-ropa revelar">
-          <button type="button" class="afiche afiche-ancho" data-grande="../img/2026/polera-trazo-andino-1200.webp" data-alt="Trazo Andino T-shirt for MBON coordinators, front and back" data-w="1200" data-h="768"><img src="../img/2026/polera-trazo-andino-640.webp" width="640" height="410" loading="lazy" alt="Trazo Andino T-shirt for MBON coordinators, front and back"></button>
-          <div class="ig-pie"><h4>«Trazo andino» uniforms</h4><p>T-shirts and a tracksuit for MBON coordinators, with the Andes as a stripe and three palettes to choose from.</p></div>
+          <div class="ropa">
+            <ul class="ropa-pista" data-ropa-pista aria-label="Apparel designs">
+              <li><button type="button" class="afiche" data-grande="../img/2026/ropa-polera-trazo-andino-1100.webp" data-alt="«Trazo andino» T-shirt for MBON coordinators, front and back, as a real garment" data-w="1100" data-h="733"><img src="../img/2026/ropa-polera-trazo-andino-560.webp" width="560" height="373" style="aspect-ratio: 560 / 373" loading="lazy" alt="«Trazo andino» T-shirt for MBON coordinators, front and back, as a real garment"></button></li>
+              <li><button type="button" class="afiche" data-grande="../img/2026/ropa-conjunto-v01-1100.webp" data-alt="«Trazo andino» tracksuit: windbreaker with the Andes and trousers, front and back" data-w="1100" data-h="1375"><img src="../img/2026/ropa-conjunto-v01-560.webp" width="560" height="700" style="aspect-ratio: 560 / 700" loading="lazy" alt="«Trazo andino» tracksuit: windbreaker with the Andes and trousers, front and back"></button></li>
+              <li><button type="button" class="afiche" data-grande="../img/2026/ropa-conjunto-salvia-1100.webp" data-alt="«Trazo andino» tracksuit in the sage and sand palette" data-w="1100" data-h="1375"><img src="../img/2026/ropa-conjunto-salvia-560.webp" width="560" height="700" style="aspect-ratio: 560 / 700" loading="lazy" alt="«Trazo andino» tracksuit in the sage and sand palette"></button></li>
+              <li><button type="button" class="afiche" data-grande="../img/2026/ropa-conjunto-petroleo-1100.webp" data-alt="«Trazo andino» tracksuit in the petrol and stone palette, with striped trousers" data-w="1100" data-h="1375"><img src="../img/2026/ropa-conjunto-petroleo-560.webp" width="560" height="700" style="aspect-ratio: 560 / 700" loading="lazy" alt="«Trazo andino» tracksuit in the petrol and stone palette, with striped trousers"></button></li>
+              <li><button type="button" class="afiche" data-grande="../img/2026/ropa-conjunto-granate-1100.webp" data-alt="«Trazo andino» tracksuit in the maroon and olive palette" data-w="1100" data-h="1375"><img src="../img/2026/ropa-conjunto-granate-560.webp" width="560" height="700" style="aspect-ratio: 560 / 700" loading="lazy" alt="«Trazo andino» tracksuit in the maroon and olive palette"></button></li>
+            </ul>
+            <button type="button" class="redondo ropa-ant" data-ropa-ant aria-label="Previous design"><svg class="ico" aria-hidden="true"><use href="#i-izq"/></svg></button>
+            <button type="button" class="redondo ropa-sig" data-ropa-sig aria-label="Next design"><svg class="ico" aria-hidden="true"><use href="#i-der"/></svg></button>
+          </div>
+          <div class="ig-pie"><h4>«Trazo andino» uniforms</h4><p>A T-shirt and a tracksuit for MBON coordinators, with the Andes as a stripe and three palettes to choose from. Swipe to see each design.</p></div>
         </article>
 
         <figure class="ig-tarjeta ig-intro pantalla-video revelar" data-video-auto>
-          <video muted playsinline loop preload="none" poster="../img/2026/intro-conquis-640.webp" width="640" height="358" data-src="../video/2026/intro-conquis-640.mp4" aria-label="Animated club intro: Pathfinders walking through a forest towards the title Misión Boliviana Occidental Norte"></video>
+          <video muted playsinline loop preload="none" poster="../img/2026/camino-elias-640.webp" width="640" height="360" data-src="../video/2026/camino-elias-640.mp4" aria-label="3D animated scene: a young man walks away along a path between green hills, with the Spanish text «A path laid out by God himself»"></video>
           <button type="button" class="redondo pausa" data-video-pausa aria-label="Pause the animation"><svg class="ico i-pausa" aria-hidden="true"><use href="#i-pausa"/></svg><svg class="ico i-play" aria-hidden="true"><use href="#i-play"/></svg></button>
-          <figcaption><b>Animated intro for club videos.</b> Animated illustration and titles in DaVinci Resolve, 6 s.</figcaption>
+          <figcaption><b>«A path laid out by God himself».</b> A scene animated in Blender for the Elijah episode of the Nativzar channel, with on-screen handwritten text (in Spanish).</figcaption>
         </figure>
       </div>
     </div>
@@ -251,7 +258,7 @@
       <span class="area-n" aria-hidden="true">02</span>
       <div>
         <p class="pre">Video and animation</p>
-        <h2 id="video-t">Short stories that <em>stick.</em></h2>
+        <h2 id="video-t">Sharing the Message, <em>one video at a time.</em></h2>
       </div>
       <p class="area-intro">I write the script, record or generate the voice, edit, animate and add subtitles. The Nativzar channel series <b>«Written before it was discovered»</b> already has seven episodes (in Spanish).</p>
     </header>

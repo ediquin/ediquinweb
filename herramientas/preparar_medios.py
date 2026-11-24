@@ -36,7 +36,21 @@ webp(FLYER / 'afiches/afiche-especialidad-coleccionista-parches-reales.png', 'af
 webp(ID / 'logos/kauxte-logo-completo-20261117.webp', 'kauxte-logo', [640, 1000])
 webp(ID / 'banners/banner-github-1280x640.webp', 'kauxte-banner', [640, 1280])
 webp(WEB / 'marca/img/logo3d-20261117-1-800.webp', 'kauxte-3d', [520, 800])
-webp(WEB / 'nativzar/img/logo-nativzar-completo-20261120-1.webp', 'nativzar-logo', [512])
+# Logo oficial de Nativzar: la versión con el inicio del sendero suavizado en la neblina (Nativzar_videos/
+# video/recursos/marca/nativzar/README.md), con el nombre NATIVZAR del logo completo debajo.
+MARCA = PP / 'Nativzar_videos/video/recursos/marca/nativzar'
+def logo_nativzar():
+    suave = Image.open(MARCA / 'nativzar-sin-tipografia-sendero-suave-v02.png').convert('RGB')
+    nombre = Image.open(MARCA / 'nativzar-original-con-nombre-1254.png').convert('RGB')
+    mascara = Image.new('L', suave.size, 0)
+    for y in range(suave.height):
+        mascara.paste(round(255 * min(1, max(0, (y - 1010) / 30))), (0, y, suave.width, y + 1))
+    Image.composite(nombre, suave, mascara).save(OUT / 'nativzar-logo-oficial.png')
+    webp(OUT / 'nativzar-logo-oficial.png', 'nativzar-logo-oficial', [512, 1000]); (OUT / 'nativzar-logo-oficial.png').unlink()
+logo_nativzar()
+# Logo 3D (segunda versión, Three.js): imagen fija capturada con herramientas/logo3d/capturar_poster.mjs
+if (RAIZ / 'herramientas/logo3d/poster-montana3d.png').exists():
+    webp(RAIZ / 'herramientas/logo3d/poster-montana3d.png', 'nativzar-3d-v2', [480, 900])
 webp(WEB / 'nativzar/img/logo3d-nativzar-20261124-1-1080.webp', 'nativzar-3d', [480, 900])
 # 02 Video
 canal = WEB / 'nativzar/img/canal'
@@ -74,25 +88,30 @@ for n, f in ((1, 'afiche-desafio-1-disciplina-civismo-v12-insignias-correctas-hd
     webp(SP / f, f'panoleta-{n}', [360, 900], q=78)
 for n, f in (('flyer-excursion', 'output/afiches/club-central-excursion-v4.png'),
              ('flyer-recepcion', 'output/recepcion-sabado-2026-09-18/afiche-v5.png'),
-             ('flyer-campori', 'output/reunion-campori-regional-2026-10-08/flyer-reunion-campori-whatsapp-1080x1350.png'),
-             ('flyer-dia-mundial', 'output/dia-mundial-conquistador-2026-09-19/afiche-club-central-v1.png'),
-             ('conquisruta', 'output/conquisruta/conquisruta-agosto-2026-cuatro-papiros.png')):
+             ('flyer-dia-mundial', 'output/dia-mundial-conquistador-2026-09-19/afiche-club-central-v1.png')):
     webp(FLYER / f, n, [420, 900], q=78)
-for n, f in (('escudo-cead', 'output/cead/cead-escudo-hexagonal-v9-tipografia-borde-unico.png'),
+for n, f in (('parche-convencion', 'assets/logos_ministerios_a_revisar_y_ordenar/parche_prototipo.jpg'),
              ('escudo-gmm', 'output/curso-gmm-gmma/escudo-gmm-gmma-v4-minimalista.png'),
              ('escudo-cead-liderazgo', 'output/logo-cead-conquistadores-2026-10-13/logo-cead-fixed-v2-sin-achocalla.png')):
     webp(FLYER / f, n, [400, 800], q=80)
-webp(FLYER / 'output/poleras-coordinadores-mbon-campori/trazo-andino-cordillera-rev07.png', 'polera-trazo-andino', [640, 1200], q=80)
-webp(FLYER / 'output/conjunto-trazo-andino/conjunto-trazo-andino-v01.png', 'conjunto-trazo-andino', [480, 900], q=80)
-# Intro del club (DaVinci Resolve, 4K, 5,7 s): versión liviana de 640 px y su póster
-intro = RESPALDO / 'Videos/DaVinci_resolve/INTROCONQUIS.mp4'
-if intro.exists():
+# Indumentaria: las vistas de catálogo (prenda real), en un carrusel
+for n, f in (('ropa-polera-trazo-andino', 'output/poleras-coordinadores-mbon-campori/trazo-andino-cordillera-rev07-catalogo.png'),
+             ('ropa-conjunto-v01', 'output/conjunto-trazo-andino/conjunto-trazo-andino-v01-catalogo.png'),
+             ('ropa-conjunto-salvia', 'output/conjunto-trazo-andino/paleta-01-salvia-y-arena-catalogo.png'),
+             ('ropa-conjunto-petroleo', 'output/conjunto-trazo-andino/paleta-02-petroleo-y-piedra-pantalon-franjas-catalogo.png'),
+             ('ropa-conjunto-granate', 'output/conjunto-trazo-andino/paleta-03-granate-y-oliva-catalogo.png')):
+    webp(FLYER / f, n, [560, 1100], q=80)
+# Animación propia: «Un camino trazado por Dios mismo» del episodio horizontal de Nativzar (Blender), 6:24–6:37.
+# (La intro del club de DaVinci Resolve se quitó: el titular aclaró que no la hizo él.)
+ep = PP / 'Nativzar_videos/video/episodio01/episodio01_blender.mp4'
+if ep.exists():
     import subprocess
-    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(intro), '-an', '-vf', 'scale=640:-2', '-c:v', 'libx264',
-                    '-crf', '26', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', str(VID / 'intro-conquis-640.mp4')], check=True)
-    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', '5.2', '-i', str(intro), '-frames:v', '1', '-vf', 'scale=1280:-2',
-                    str(OUT / 'intro-conquis-final.png')], check=True)
-    webp(OUT / 'intro-conquis-final.png', 'intro-conquis', [640, 1200]); (OUT / 'intro-conquis-final.png').unlink()
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', '384', '-t', '13', '-i', str(ep), '-an', '-vf', 'scale=640:-2,fps=24',
+                    '-c:v', 'libx264', '-crf', '28', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
+                    str(VID / 'camino-elias-640.mp4')], check=True)
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', '388', '-i', str(ep), '-frames:v', '1', '-vf', 'scale=1280:-2',
+                    str(OUT / 'camino-elias.png')], check=True)
+    webp(OUT / 'camino-elias.png', 'camino-elias', [640, 1200]); (OUT / 'camino-elias.png').unlink()
 print('listo')
 
 # Capturas de pantalla de los sitios (1440×900). La de Kauxte se tomó del sitio local el 24/11/2026;

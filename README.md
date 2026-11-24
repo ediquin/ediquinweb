@@ -22,12 +22,13 @@ La plantilla Bootstrap «Grayscale» de 2020 se reemplazó por un sitio propio, 
 ### Archivos
 
 - `index.html`: la página en español. `en/index.html`: la versión en inglés, generada por `herramientas/construir_en.py`.
-- `css/portafolio-20261124-2.css` y `js/portafolio-20261124-2.js`: estilos y comportamiento. Llevan versión en el nombre, así que un cambio futuro necesita un nombre nuevo.
+- `css/portafolio-20261124-3.css` y `js/portafolio-20261124-3.js`: estilos y comportamiento. Llevan versión en el nombre, así que un cambio futuro necesita un nombre nuevo.
 - `fonts/`: Bricolage Grotesque, DM Sans y Fraunces (licencia OFL), las mismas de Kauxte. No se usa Google Fonts.
 - `img/2026/` y `video/2026/`: medios optimizados (WebP y vistas previas MP4 de 70–270 KB). Los genera `herramientas/preparar_medios.py`.
 - `img/2026/og-ediquin.jpg`: imagen para compartir el enlace. Se genera con `herramientas/captura_og.mjs`.
 - `nativzar-mj/`: páginas legales de la app Nativzar MJ (privacidad, términos y eliminación de cuenta). **No mover ni renombrar:** la ficha de la app enlaza a estas direcciones.
 - `img/perfil.png`, `circuit.png`, `maquina.png` y `proy.png`: originales de los que salen los WebP.
+- `herramientas/logo3d/`: fuente del logo 3D de Nativzar (`montana3d.js`), su empaquetado (`construir.sh` → `js/montana3d-20261124-3.js`), el laboratorio (`lab/`) y la captura de la imagen fija (`capturar_poster.mjs`).
 
 ### Regenerar los medios y probar
 
@@ -89,9 +90,36 @@ Qué cambió:
 - la intro del club se reproduce sola, se pausa y el botón cambia su texto en cada idioma;
 - el idioma de cada página es correcto y enlaza a la otra.
 
+## Tercera versión del 24/11/2026: nombre, logo 3D nuevo y trabajos propios
+
+Pedido del titular al revisar la segunda versión:
+- **Héroe:** el título es ahora su nombre, «Edilson Byron *Laura Mercado*». Se quitó la línea «Edilson Byron Laura Mercado · La Paz, Bolivia» de arriba.
+- **Video:** «Historias cortas que se quedan» pasó a «Compartir el Mensaje, un video a la vez» (en inglés, «Sharing the Message, one video at a time»).
+- **Logo de Nativzar:** se usa el logo oficial con el inicio del sendero suavizado en la neblina (`Nativzar_videos/video/recursos/marca/nativzar/nativzar-sin-tipografia-sendero-suave-v02.png`), con el nombre NATIVZAR del logo completo debajo. La unión no se nota.
+- **Logo 3D rehecho.** El anterior apilaba terrazas cilíndricas y parecía una torta. El nuevo (`herramientas/logo3d/montana3d.js`, Three.js 0.170, 130 KB gzip) tiene:
+  - una sola montaña de roca facetada, con estratos y caras planas;
+  - el sendero verde **tallado** en la cara delantera, en zigzag por las curvas de nivel, con corte arriba y relleno abajo;
+  - la gran piedra, agaves, piedritas, la cruz con halo y neblina en la base.
+
+  Se puede girar 360° arrastrando (mouse o dedo) o con el botón «Girar 360°», y tiene inercia. Sin tocarla, vuelve de frente y se mece. El módulo se pide solo cuando la tarjeta se acerca a la pantalla. Con *reducir movimiento*, ahorro de datos o sin aceleración gráfica se ve la imagen fija `nativzar-3d-v2-*.webp`. La tarjeta pasó a ocupar todo el ancho para que haya espacio para girarla.
+- **Escudos:** el escudo hexagonal del CEAD era casi el mismo diseño que el de GMM y GMMA. Se reemplazó por el **parche de la Convención 2026 de la MBON** (`AI_Design_Conquis/assets/logos_ministerios_a_revisar_y_ordenar/parche_prototipo.jpg`).
+- **Flyers:** se quitó el de la reunión informativa del Camporí Regional, que se veía genérico.
+- **ConquisRuta:** se quitó. Todas las versiones guardadas, en el disco y en `/srv/respaldo`, tienen los papiros vacíos. Vuelve cuando el titular pase la versión enviada con las actividades.
+- **Uniformes:** carrusel con las vistas de catálogo, que parecen prendas reales: la polera Trazo andino y el conjunto deportivo en sus tres paletas. Tiene flechas y se puede deslizar, y cada imagen se abre en el visor.
+- **Animación:** se quitó la intro del club (DaVinci Resolve), porque el titular aclaró que no la hizo él. La reemplaza la escena **«Un camino trazado por Dios mismo»** del episodio horizontal de Elías del canal Nativzar, animado en Blender: 6:24 a 6:37, 13 s, 270 KB.
+- Imagen para compartir regenerada con el nombre. CSS y JS pasaron a `-20261124-3`. Los medios que ya no se usan salieron del repositorio.
+
+**Verificación local:** `qa_portafolio.mjs` dio **71 bien, 0 mal** en español e inglés, a 390, 768 y 1440 px. Ahora prueba también:
+- que el carrusel de indumentaria avanza;
+- que el logo 3D deja su imagen fija cuando no hay WebGL acelerado.
+
+En el navegador de la app, con GPU, se comprobó que el 3D carga, gira al arrastrar y oculta el aviso al tocarlo. A 375 px no hay desborde horizontal.
+
 ### Pendiente del titular
 
 - Revisar la trayectoria nueva (tomada del CV) y la traducción al inglés.
+- Pasar la ConquisRuta enviada con las actividades en cada papiro, si la tiene en el teléfono o en WhatsApp.
+- Si quiere una intro nueva hecha con Google Flow, generarla en su cuenta (ese servicio no se usa desde aquí).
 - Si quiere, pasar la foto profesional del CV para reemplazar el retrato de 334 px.
 - Una foto de perfil de mayor resolución, con fondo recortado.
 - Si quiere, agregar ejemplos de retoque «antes y después» de fotos propias, y nombrar sus herramientas de edición de fotos.

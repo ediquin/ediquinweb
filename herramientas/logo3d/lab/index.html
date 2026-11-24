@@ -1,0 +1,8 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Laboratorio montaña 3D</title>
+<style>body{margin:0;background:#f3eee4}#c{width:100vw;height:100vh;position:relative}canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:pan-y}</style>
+</head><body><div id="c"></div><script type="module">
+import {montar} from './montana3d-lab.js';
+const p=new URLSearchParams(location.search);
+window.m=montar(document.getElementById("c"),{poster:p.has("poster"),angulo:p.has("a")?+p.get("a"):undefined});
+if(p.has("poster"))document.body.style.background="transparent";
+</script></body></html>
