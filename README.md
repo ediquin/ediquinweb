@@ -256,6 +256,7 @@ axe mide el contraste sin la animación de aparición, porque esa animación dej
 - La sección 06 enlaza a `linkedin.com/in/ediquin/details/certifications/`, y la tarjeta TechStar a `…/details/honors/`. Así, cuando sume un certificado en LinkedIn, el portafolio queda al día sin editarlo.
 - No se copiaron los enlaces de cada certificado.
 - QA local: 187 bien, 0 mal. Inglés: 350 textos.
+- **Publicado** el 26/11/2026 con el visto bueno del titular (commit `1a6d5bc`). Pages lo construyó sin errores. QA sobre el sitio en vivo: **187 bien, 0 mal**. Para revertir: `git revert 1a6d5bc`.
 
 ### Pendiente del titular
 - Agregar con tiempo el resto de los requisitos de la sexta versión: enlaces de certificados que no estén en LinkedIn, un botón para descargar el CV si lo quiere, y revisar la cifra «Apps y herramientas: 7» y las tecnologías de Nativzar MJ.
