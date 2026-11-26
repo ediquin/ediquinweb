@@ -313,15 +313,16 @@ p { margin: 0; }
 .ig-pie p { color: var(--gris); font-size: 15.5px; }
 .ig-tarjeta .afiche { box-shadow: none; border-radius: 0; }
 .ig-tarjeta .afiche img, .escudos .afiche img, .flyers .afiche img { aspect-ratio: auto; height: auto; }
-.ig-escudos { grid-column: span 6; }
+.ig-escudos { grid-column: span 5; }
 .escudos { flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; align-items: center; padding: 18px 18px 0; }
 .escudos .afiche { background: #fff; border-radius: 16px; }
-.ig-flyers { grid-column: span 6; background: var(--tinta); color: var(--claro); border: 0; }
+.ig-flyers { grid-column: span 7; background: var(--tinta); color: var(--claro); border: 0; }
 .ig-flyers .ig-pie p { color: var(--claro-2); }
-.flyers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: end; padding: 22px 22px 4px; }
+.flyers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: end; padding: 22px 22px 4px; }
 .flyers .afiche { border-radius: 10px; box-shadow: 0 16px 30px -16px rgba(0, 0, 0, .9); }
 .flyers .afiche:nth-child(odd) { translate: 0 -10px; }
-.ig-ropa { grid-column: span 7; background: #e9e3e3; }
+.ig-ropa { grid-column: span 12; background: #e9e3e3; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: center; }
+.ig-ropa .ig-pie { padding: 28px clamp(22px, 3vw, 40px); }
 .ropa { position: relative; flex: 1; }
 .ropa-pista { list-style: none; margin: 0; padding: 18px; display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: thin; }
 .ropa-pista li { flex: none; scroll-snap-align: center; }
@@ -330,9 +331,9 @@ p { margin: 0; }
 .ropa .redondo { position: absolute; top: 50%; translate: 0 -50%; width: 44px; height: 44px; background: rgba(246, 242, 234, .92); }
 .ropa-ant { left: 10px; }
 .ropa-sig { right: 10px; }
-.ig-intro { grid-column: span 5; padding: 0; background: var(--tinta); border: 0; }
+.ig-intro { grid-column: span 12; padding: 0; background: var(--tinta); border: 0; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); align-items: center; }
 .ig-intro video { border-radius: 0; box-shadow: none; }
-.ig-intro figcaption { margin: 0; padding: 16px 22px 20px; }
+.ig-intro figcaption { margin: 0; padding: 22px clamp(22px, 3vw, 40px); }
 
 /* 02 · riel de Shorts */
 .riel { margin-bottom: clamp(56px, 7vw, 96px); }
@@ -555,7 +556,7 @@ p { margin: 0; }
   .area-cabeza { grid-template-columns: 1fr; align-items: start; }
   .area-n { font-size: 84px; }
   .bento > .tarjeta { grid-column: span 12; }
-  .t-nativzar { grid-template-columns: 1fr; }
+  .t-nativzar, .ig-ropa, .ig-intro { grid-template-columns: 1fr; }
   .iglesia-cabeza { grid-template-columns: 1fr; }
   .serie-lista { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; scrollbar-width: thin; }
   .serie-lista li { flex: 0 0 40vw; max-width: 200px; scroll-snap-align: start; }
@@ -597,7 +598,8 @@ p { margin: 0; }
   .fm-lienzo { height: 280px; }
   .riel-pista li { flex-basis: 64vw; }
   .linea-fotos { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-  .flyers { gap: 8px; padding: 18px 14px 4px; }
+  .flyers { gap: 8px; padding: 18px 14px 4px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flyers .afiche:nth-child(odd) { translate: none; }
   .idioma { min-width: 40px; height: 36px; padding: 0 8px; font-size: 13px; }
 }
 

@@ -158,8 +158,9 @@
 
   /* 7. carrusel de indumentaria: flechas que avanzan una prenda */
   const ropa = $('[data-ropa-pista]');
-  if (ropa) {
-    const ant = $('[data-ropa-ant]'), sig = $('[data-ropa-sig]');
+  const ropaAnt = $('[data-ropa-ant]'), ropaSig = $('[data-ropa-sig]');
+  if (ropa && ropaAnt && ropaSig) {
+    const ant = ropaAnt, sig = ropaSig;
     const mover = d => {
       const li = $('li', ropa);
       ropa.scrollBy({ left: d * (li ? li.getBoundingClientRect().width + 14 : 300), behavior: reducir ? 'auto' : 'smooth' });

@@ -78,10 +78,12 @@ for (const [idioma, URL_P] of [['es', URL_], ['en', new URL('en/', URL_).href]])
     await new Promise(r => setTimeout(r, 300));
     ok(`${T} el botón cambia su texto al pausar`, await p.evaluate(e => document.querySelector('[data-video-pausa]').getAttribute('aria-label') === (e ? 'Play the animation' : 'Reproducir la animación'), idioma === 'en'));
     // carrusel de indumentaria: la flecha siguiente está activa y avanza
+    if (await p.$('[data-ropa-sig]')) {
     const ropa0 = await p.evaluate(() => { const q = document.querySelector('[data-ropa-pista]'); q.scrollIntoView({ block: 'center' }); return { x: q.scrollLeft, sig: document.querySelector('[data-ropa-sig]').disabled }; });
     await p.evaluate(() => document.querySelector('[data-ropa-sig]').click());
     await new Promise(r => setTimeout(r, 900));
     ok(`${T} carrusel de indumentaria avanza`, !ropa0.sig && await p.evaluate(a => document.querySelector('[data-ropa-pista]').scrollLeft > a, ropa0.x));
+    }
     // logo 3D: sin aceleración gráfica (Chrome sin ventana) debe quedar la imagen fija, visible y sin errores
     await p.evaluate(() => document.querySelector('[data-montana3d]').scrollIntoView({ block: 'center' }));
     await new Promise(r => setTimeout(r, 1500));

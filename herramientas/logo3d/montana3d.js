@@ -1,7 +1,9 @@
-// Logo 3D de Nativzar para el portafolio (24/11/2026, segunda versión).
-// La primera versión apilaba terrazas cilíndricas y parecía una torta. Esta es UNA montaña de roca facetada:
-// un relieve con estratos y facetas, con el sendero esmeralda TALLADO en su cara (repisas en zigzag con
-// acantilados arriba y abajo), la gran piedra, agaves, piedritas y la cruz con halo en la cima.
+// Logo 3D de Nativzar para el portafolio (24/11/2026, tercera versión).
+// v1 apilaba terrazas cilíndricas (parecía una torta); v2 era un cono liso con el sendero como cinta aparte,
+// que parecía flotar. Esta sigue el dibujo del logo: bloques de roca de techo plano y paredes verticales,
+// con un sendero verde angosto que RODEA la montaña en espiral, metido entre bordillos de piedra clara,
+// con paredes arriba, caídas abajo, tramos planos y empinados, y cuatro grietas que lo cortan.
+// Lleva la gran piedra, agaves, piedritas y la cruz con halo en la cima.
 // Se gira 360° arrastrando (mouse o dedo) o con el botón «Girar»; sin tocarla, se mece suavemente de frente.
 //
 // montar(caja, { poster }) crea un <canvas> dentro de `caja` y lo funde sobre la imagen fija.
@@ -12,7 +14,7 @@ import {
   WebGLRenderer, Scene, PerspectiveCamera, Group, Mesh, InstancedMesh, BoxGeometry, BufferGeometry,
   IcosahedronGeometry, ConeGeometry, CircleGeometry, MeshStandardMaterial, MeshBasicMaterial, SpriteMaterial, Sprite,
   HemisphereLight, DirectionalLight, CanvasTexture, Color, Object3D, Vector3, Float32BufferAttribute,
-  NeutralToneMapping, SRGBColorSpace, PCFSoftShadowMap,
+  NeutralToneMapping, SRGBColorSpace, PCFSoftShadowMap, DoubleSide,
 } from 'three';
 
 const PAPEL = 0xf3eee4;
@@ -65,99 +67,322 @@ function facetas(x, y, s) {
   return gx * (x - cx) + gy * (y - cy) + base * 0.5;
 }
 
-// ---- la montaña ------------------------------------------------------------------------------
-const ALTO = 3.7;          // altura de la cima
-const RX = 2.75, RZ = 2.35, CZ = -0.25;
-const MEDIO = 0.19;        // medio ancho del sendero
-const CIMA = [0.02, CZ + 0.05];
+// ---- la montaña: columnas de roca, como el logo ----------------------------------------------
+// El logo dibuja la montaña con bloques de roca de techo plano y paredes verticales, y el sendero verde
+// metido entre piedras claras. Aquí cada bloque es una celda de Voronoi extruida hasta el suelo.
+const ALTO = 3.5;          // altura de la cima
+const RX = 2.6, RZ = 2.25, CZ = -0.2;
+const MEDIO = 0.12;        // medio ancho del sendero: angosto
+const BORDILLO = 0.12;     // franja de piedras claras a cada lado
+const REPISA = MEDIO + BORDILLO;
+const CIMA = [0, CZ];
+const VUELTAS = 2.2;       // el sendero rodea la montaña
+const GRIETAS = [0.2, 0.41, 0.6, 0.8];   // cortes que atraviesan el sendero (fracción del recorrido)
+const SEP = 0.085;          // separación media entre bloques
 
+const radio = (x, z) => Math.hypot(x / RX, (z - CZ) / RZ);
+const conoLiso = rho => (rho >= 1 ? 0 : ALTO * Math.pow(1 - rho, 1.05));
 function relieve(x, z) {
-  const u = x / RX, v = (z - CZ) / RZ;
-  const r = Math.hypot(u, v) + (fbm(x * 0.9 + 3, z * 0.9, 11) - 0.5) * 0.22;
+  const r = radio(x, z) + (fbm(x * 0.9 + 3, z * 0.9, 11) - 0.5) * 0.14;
   if (r >= 1) return 0;
-  let h = ALTO * Math.pow(1 - r, 1.08);
-  h += 0.3 * Math.pow(Math.max(0, 1 - r / 0.25), 2);                     // pico más agudo
-  const borde = r * (1 - r) * 4;                                            // 0 en base y cima
-  h += (fbm(x * 1.3, z * 1.3, 21) - 0.5) * 1.1 * borde;                     // lomos y quebradas
-  h += facetas(x * 2.2, z * 2.2, 31) * 0.42 * borde;                         // caras de roca
-  // estratos: bandas de acantilado torcidas por el ruido, mezcladas a medias para que no queden anillos
-  const e = (h + (fbm(x * 0.8, z * 0.8, 41) - 0.5) * 0.7) / 0.46;
-  const banda = (Math.floor(e) + paso(0.62, 0.86, e - Math.floor(e))) * 0.46;
-  h = h * 0.45 + banda * 0.55 * paso(0, 0.3, h);
-  return Math.max(0, h);
+  return conoLiso(r) + 0.25 * Math.pow(Math.max(0, 1 - r / 0.2), 2) + (facetas(x * 1.7, z * 1.7, 31) - 0) * 0.35 * paso(0, 0.3, 1 - r);
 }
 
-// sendero: sale de la neblina al frente y sube en zigzag siguiendo las curvas de nivel de la cara delantera
-// (cada tramo va por un anillo de la montaña y gira en los extremos), hasta la cima.
-const ANILLOS = [0.86, 0.73, 0.6, 0.48, 0.37, 0.27, 0.17];
-function puntosSendero() {
-  const p = [[-0.5, CZ + RZ * 1.32], [-0.62, CZ + RZ * 1.05]];
-  ANILLOS.forEach((a, k) => {
-    const abre = 0.58 + k * 0.07;                       // los tramos de arriba abarcan más ángulo
-    const desde = k % 2 ? abre : -abre, hasta = -desde;
-    for (let s = 0; s <= 18; s++) {
-      const t = desde + ((hasta - desde) * s) / 18;
-      p.push([Math.sin(t) * RX * a, CZ + Math.cos(t) * RZ * a]);
-    }
-  });
-  p.push(CIMA);
-  return p;
-}
-
+// sendero en espiral: sale de la neblina al frente, da 2,2 vueltas subiendo y llega a la cima.
+// La pendiente cambia: g(t) alterna tramos casi planos y otros empinados.
 function construirSendero() {
-  const PUNTOS = puntosSendero();
-  const pts = [];
-  for (let k = 0; k < PUNTOS.length - 1; k++) {
-    const [x1, z1] = PUNTOS[k], [x2, z2] = PUNTOS[k + 1];
-    const n = Math.max(1, Math.ceil(Math.hypot(x2 - x1, z2 - z1) / 0.04));
-    for (let s = 0; s < n; s++) pts.push([x1 + ((x2 - x1) * s) / n, z1 + ((z2 - z1) * s) / n]);
+  const R0 = 0.95, R1 = 0.12, F0 = -0.5;
+  const g = t => t + (0.72 * Math.sin(2 * Math.PI * 5 * t)) / (2 * Math.PI * 5);
+  const en = t => {
+    const f = F0 + t * VUELTAS * Math.PI * 2;
+    // el sendero se mete y se sale un poco: no es un anillo perfecto
+    // zigzag de quiebres rectos (onda triangular), como el sendero del logo, más un poco de desorden
+    const tri = u => 2 * Math.abs(u - Math.floor(u + 0.5));
+    const rho = R0 - (R0 - R1) * g(t) + (0.07 * (tri(f * 1.3 / Math.PI) - 0.5) + 0.05 * (fbm(t * 30, 1.3, 81) - 0.5)) * paso(0, 0.06, t) * (1 - paso(0.9, 1, t));
+    return [Math.sin(f) * RX * rho, CZ + Math.cos(f) * RZ * rho, rho];
+  };
+  const pts = [], alt = [], vuelta = [];
+  // entrada: sale de la neblina al frente y sube derecho hasta el comienzo de la espiral (sobre roca, no por el borde)
+  {
+    const [xa, za] = en(0), f = F0;
+    const xe = Math.sin(f) * RX * 1.22, ze = CZ + Math.cos(f) * RZ * 1.22;
+    const n = Math.ceil(Math.hypot(xa - xe, za - ze) / 0.035);
+    for (let s = 0; s < n; s++) { const u = s / n; pts.push([xe + (xa - xe) * u, ze + (za - ze) * u]); alt.push(conoLiso(R0) * suave(u)); vuelta.push(0); }
   }
-  pts.push(CIMA);
+  for (let t = 0; t < 1;) {
+    const [x, z, rho] = en(t);
+    pts.push([x, z]); alt.push(conoLiso(rho)); vuelta.push(Math.floor(t * VUELTAS + 0.08));
+    const [x2, z2] = en(t + 1e-4);
+    t += 0.035 / (Math.hypot(x2 - x, z2 - z) / 1e-4);
+  }
+  const cima = conoLiso(R1);
+  const [xf, zf] = en(1);
+  for (let s = 0; s <= 6; s++) { pts.push([xf + (CIMA[0] - xf) * s / 6, zf + (CIMA[1] - zf) * s / 6]); alt.push(cima); vuelta.push(Math.ceil(VUELTAS)); }
+  for (let i = 1; i < alt.length; i++) alt[i] = Math.max(alt[i], alt[i - 1]);
   const largo = [0];
   for (let i = 1; i < pts.length; i++) largo.push(largo[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
   const total = largo[largo.length - 1];
-  // pendiente pareja: sube en proporción al largo recorrido desde que toca la roca
-  const entra = largo[pts.findIndex(([x, z]) => Math.hypot(x / RX, (z - CZ) / RZ) < 0.97)] || 0;
-  const cima = relieve(...CIMA) * 0.9;
-  const lineal = largo.map(l => cima * fijar((l - entra) / (total - entra), 0, 1));
-  // mezcla con el relieve suavizado (siempre en subida) para que el sendero no flote ni se hunda demasiado
-  const crudo = pts.map(([x, z]) => relieve(x, z));
-  const terreno = crudo.map((_, i) => {
-    let s = 0, n = 0;
-    for (let k = -12; k <= 12; k++) { const j = i + k; if (j >= 0 && j < crudo.length) { s += crudo[j]; n++; } }
-    return s / n;
+  const grieta = largo.map(l => GRIETAS.some(g0 => Math.abs(l - g0 * total) < 0.085));
+  // escalones: solo donde el sendero sube fuerte (como en el logo); en el resto queda llano o en rampa suave.
+  // `alt` es la subida lisa (la usan la roca y los bordillos); `escalon` es lo que se pisa.
+  const escalon = alt.map((h, i) => {
+    const a = Math.max(0, i - 3), b = Math.min(alt.length - 1, i + 3);
+    const pend = (alt[b] - alt[a]) / Math.max(1e-6, largo[b] - largo[a]);
+    return pend > 0.21 ? Math.round(h / 0.075) * 0.075 : h;
   });
-  const alt = lineal.map((l, i) => l * 0.5 + terreno[i] * 0.5);
-  for (let i = 1; i < alt.length; i++) alt[i] = Math.max(alt[i], alt[i - 1]);
-  alt[alt.length - 1] = cima;
-  return { pts, alt, largo, total, cima };
+  for (let i = 1; i < escalon.length; i++) escalon[i] = Math.max(escalon[i], escalon[i - 1]);
+  // rejilla: para cada casilla de 0,3, los tramos que pasan a menos de 0,95 (acelera las búsquedas)
+  const rejilla = new Map(), CAS = 0.3, EXP = 0.95;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [x1, z1] = pts[i], [x2, z2] = pts[i + 1];
+    for (let a = Math.floor((Math.min(x1, x2) - EXP) / CAS); a <= Math.floor((Math.max(x1, x2) + EXP) / CAS); a++)
+      for (let b = Math.floor((Math.min(z1, z2) - EXP) / CAS); b <= Math.floor((Math.max(z1, z2) + EXP) / CAS); b++) {
+        const k = a * 1000 + b;
+        if (!rejilla.has(k)) rejilla.set(k, []);
+        rejilla.get(k).push(i);
+      }
+  }
+  const tramos = (x, z) => rejilla.get(Math.floor(x / CAS) * 1000 + Math.floor(z / CAS));
+  return { pts, alt, escalon, largo, total, cima, grieta, vuelta, tramos };
 }
 
-// distancia del punto (x,z) al sendero → { d, i (índice del tramo), t, h (altura del sendero) }
+// distancia del punto (x,z) al sendero → { d, h (altura del sendero), s (fracción), px, pz, grieta }
 function cercano(S, x, z) {
-  let mejor = { d: 9, h: 0, s: 0 };
-  for (let i = 0; i < S.pts.length - 1; i++) {
+  let m = { d: 9, h: 0, s: 0, px: 0, pz: 0, grieta: false };
+  const lista = S.tramos ? S.tramos(x, z) : null;
+  const n = lista ? lista.length : S.pts.length - 1;
+  for (let q = 0; q < n; q++) {
+    const i = lista ? lista[q] : q;
     const [x1, z1] = S.pts[i], [x2, z2] = S.pts[i + 1];
     const dx = x2 - x1, dz = z2 - z1, l2 = dx * dx + dz * dz || 1e-9;
     const t = fijar(((x - x1) * dx + (z - z1) * dz) / l2, 0, 1);
-    const d = Math.hypot(x - x1 - dx * t, z - z1 - dz * t);
-    if (d < mejor.d) mejor = { d, h: S.alt[i] + (S.alt[i + 1] - S.alt[i]) * t, s: (S.largo[i] + (S.largo[i + 1] - S.largo[i]) * t) / S.total };
+    const px = x1 + dx * t, pz = z1 + dz * t;
+    const d = Math.hypot(x - px, z - pz);
+    if (d < m.d) m = { d, h: S.alt[i] + (S.alt[i + 1] - S.alt[i]) * t, s: (S.largo[i] + (S.largo[i + 1] - S.largo[i]) * t) / S.total, px, pz, grieta: S.grieta[t < 0.5 ? i : i + 1] };
   }
-  return mejor;
+  return m;
 }
 
-// altura final: relieve con el sendero tallado (repisa plana, corte arriba, relleno abajo) y la cima aplanada
-function alturaFinal(S, x, z) {
-  let h = relieve(x, z);
-  const c = cercano(S, x, z);
-  if (c.d < MEDIO) h = c.h;
-  else {
-    const k = 2.1 * (c.d - MEDIO);
-    h = fijar(h, c.h - k, c.h + k);
+function recortar(poly, mx, mz, nx, nz) {
+  const out = [], f = p => (p[0] - mx) * nx + (p[1] - mz) * nz;
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length], fa = f(a), fb = f(b);
+    if (fa <= 0) out.push(a);
+    if ((fa < 0 && fb > 0) || (fa > 0 && fb < 0)) { const t = fa / (fa - fb); out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]); }
   }
-  const dc = Math.hypot(x - CIMA[0], z - CIMA[1]);
-  if (dc < 0.3) h = Math.max(h, S.cima) * (1 - paso(0.18, 0.3, dc)) + h * paso(0.18, 0.3, dc);
-  return { h, c };
+  return out;
+}
+
+function recortarLinea(poly, a, b, c) {
+  const out = [], f = p => a * p[0] + b * p[1] + c;
+  for (let i = 0; i < poly.length; i++) {
+    const p = poly[i], q = poly[(i + 1) % poly.length], fp = f(p), fq = f(q);
+    if (fp <= 0) out.push(p);
+    if ((fp < 0 && fq > 0) || (fp > 0 && fq < 0)) { const t = fp / (fp - fq); out.push([p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]); }
+  }
+  return out;
+}
+function dentroDe(P, x, z) {
+  let c = false;
+  for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+    const [xi, zi] = P[i], [xj, zj] = P[j];
+    if ((zi > z) !== (zj > z) && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) c = !c;
+  }
+  return c;
+}
+
+// bloques: celdas chicas (Voronoi sobre una rejilla con desorden) agrupadas en rocas de tamaños mixtos.
+function construirBloques(S, r) {
+  const sem = [];
+  for (let z = CZ - RZ * 1.1; z <= CZ + RZ * 1.1; z += SEP) for (let x = -RX * 1.1; x <= RX * 1.1; x += SEP) {
+    const sx = x + (r() - 0.5) * SEP * 0.8, sz = z + (r() - 0.5) * SEP * 0.8;
+    if (radio(sx, sz) < 1.04) sem.push([sx, sz]);
+  }
+  const H = new Map(), clave = (i, j) => i * 100003 + j;
+  sem.forEach((p, k) => { const c = clave(Math.floor(p[0] / SEP), Math.floor(p[1] / SEP)); if (!H.has(c)) H.set(c, []); H.get(c).push(k); });
+  const vecinos = (x, z, rad) => {
+    const out = [];
+    for (let i = Math.floor((x - rad) / SEP); i <= Math.floor((x + rad) / SEP); i++)
+      for (let j = Math.floor((z - rad) / SEP); j <= Math.floor((z + rad) / SEP); j++) { const l = H.get(clave(i, j)); if (l) out.push(...l); }
+    return out;
+  };
+  // 1) cada celda chica: su tipo y, si es roca, entre qué alturas puede quedar (por las vueltas del sendero)
+  const hacer = (k, poly, tipo) => {
+    const x = poly.reduce((t, q) => t + q[0], 0) / poly.length, z = poly.reduce((t, q) => t + q[1], 0) / poly.length;
+    const c = cercano(S, x, z), rc = radio(x, z);
+    const B = { celda: k, x, z, poly, c, rc, tipo, h: 0, incl: [0, 0], ox: x, oz: z, tinte: 0.9 + r() * 0.1, lado: 0.88 + r() * 0.12 };
+    if (tipo === 'cima') B.h = S.cima + 0.02;
+    else if (tipo === 'bajo') B.h = c.h - (c.grieta ? 0.6 : 0.05);
+    else if (tipo === 'bordillo') {
+      const adentro = rc < radio(c.px, c.pz);
+      B.h = c.grieta ? c.h - 0.35 : c.h + (adentro ? 0.04 + r() * 0.06 : 0.008 + r() * 0.02);   // por fuera, bajos: no tapan el sendero
+    } else {
+      const hc = relieve(x, z);
+      let tope = Infinity, piso = 0, dArr = 9, dAba = 9, hArr = 0, hAba = 0, vAba = -1;
+      for (const i of S.tramos(x, z) || []) {
+        const j = i + 1;
+        const [x1, z1] = S.pts[i], [x2, z2] = S.pts[j];
+        const dx = x2 - x1, dz = z2 - z1, l2 = dx * dx + dz * dz || 1e-9;
+        const t = fijar(((x - x1) * dx + (z - z1) * dz) / l2, 0, 1);
+        const px = x1 + dx * t, pz = z1 + dz * t, d = Math.hypot(x - px, z - pz);
+        if (d > 0.9) continue;
+        const hs = S.alt[i] + (S.alt[j] - S.alt[i]) * t;
+        if (rc > radio(px, pz)) { tope = Math.min(tope, hs - 0.07); if (d < dArr) { dArr = d; hArr = hs; } }        // vuelta de arriba
+        else { piso = Math.max(piso, hs + 0.1); if (d < dAba) { dAba = d; hAba = hs; vAba = S.vuelta[i]; } }   // vuelta de abajo
+      }
+      let base = hc;
+      if (dArr < 9 && dAba < 9) base = hAba + (hArr - hAba) * fijar((dAba - REPISA) / Math.max(0.05, dAba + dArr - 2 * REPISA), 0, 1);
+      else if (dArr < 9) base = Math.min(hc, hArr - 0.07 - 0.9 * Math.max(0, dArr - REPISA));
+      Object.assign(B, { base, piso, tope, vAba });
+    }
+    return B;
+  };
+  // piedras del bordillo a lo largo del sendero, por lado (0 afuera, 1 adentro): cada una con su largo
+  // y su ancho propio, así la pared de roca detrás se quiebra donde termina una piedra y empieza otra
+  const cortes = [0, 1].map(() => { const c = [0]; while (c[c.length - 1] < S.total + 1) c.push(c[c.length - 1] + 0.14 + r() * 0.2); return c; });
+  const anchoPiedra = cortes.map(cs => cs.map(() => (r() - 0.5) * 0.1));
+  const piedraDe = (lado, arco) => { const cs = cortes[lado]; let i = 0; while (i + 1 < cs.length && cs[i + 1] <= arco) i++; return i; };
+  const celdas = [];
+  sem.forEach(([x, z], k) => {
+    let poly = [[x - 0.14, z - 0.14], [x + 0.14, z - 0.14], [x + 0.14, z + 0.14], [x - 0.14, z + 0.14]];
+    for (const m of vecinos(x, z, 0.25)) {
+      if (m === k) continue;
+      const [qx, qz] = sem[m];
+      poly = recortar(poly, (x + qx) / 2, (z + qz) / 2, qx - x, qz - z);
+    }
+    const c = cercano(S, x, z);
+    const rc = radio(x, z);
+    if (rc < 0.13) { celdas.push(hacer(k, poly, 'cima')); return; }
+    if (c.d < 1e-3) { celdas.push(hacer(k, poly, 'bajo')); return; }
+    // dos cortes paralelos al sendero: a MEDIO (orilla del pasto) y a REPISA (orilla de los bordillos).
+    // Así las orillas salen rectas: ni el pasto ni la pared de roca siguen el zigzag de las celdas.
+    const nx = (x - c.px) / c.d, nz = (z - c.pz) / c.d, o0 = c.px * nx + c.pz * nz;
+    const ladoP = rc < radio(c.px, c.pz) ? 1 : 0, iP = piedraDe(ladoP, c.s * S.total);
+    let resto = poly;
+    for (const [lim, tipo] of [[MEDIO, 'bajo'], [REPISA + anchoPiedra[ladoP][iP], 'bordillo']]) {
+      if (resto.length < 3 || c.d - SEP > lim) continue;
+      const cerca = recortarLinea(resto, nx, nz, -(o0 + lim));
+      if (cerca.length >= 3) { const B = hacer(k, cerca, tipo); B.piedra = ladoP * 100000 + iP; celdas.push(B); }
+      resto = recortarLinea(resto, -nx, -nz, o0 + lim);
+    }
+    if (resto.length >= 3) celdas.push(hacer(k, resto, 'roca'));
+  });
+
+  // 1b) los bordillos se juntan en PIEDRAS enteras a lo largo del sendero (de 0,12 a 0,32 de largo),
+  //     con un techo que sigue la subida: no un rosario de piedritas cada una a su altura.
+  {
+    const grupos = new Map();
+    for (const B of celdas) {
+      if (B.tipo !== 'bordillo' || B.c.grieta) continue;
+      const clave = B.piedra;
+      if (!grupos.has(clave)) grupos.set(clave, []);
+      grupos.get(clave).push(B);
+    }
+    for (const [clave, miembros] of grupos) {
+      const adentro = clave >= 100000;
+      const ox = miembros.reduce((t, b) => t + b.x, 0) / miembros.length, oz = miembros.reduce((t, b) => t + b.z, 0) / miembros.length;
+      const hm = miembros.reduce((t, b) => t + b.c.h, 0) / miembros.length;
+      const arco = miembros.reduce((t, b) => t + b.c.s, 0) / miembros.length * S.total;
+      let i0 = 0;
+      while (i0 + 1 < S.largo.length && S.largo[i0 + 1] < arco) i0++;
+      const a = Math.max(0, i0 - 3), b = Math.min(S.pts.length - 1, i0 + 3);
+      const tx = S.pts[b][0] - S.pts[a][0], tz = S.pts[b][1] - S.pts[a][1], l = Math.hypot(tx, tz) || 1;
+      const pend = (S.alt[b] - S.alt[a]) / l;
+      const incl = [(tx / l) * pend + (r() - 0.5) * 0.3, (tz / l) * pend + (r() - 0.5) * 0.3];
+      const h = hm + (adentro ? 0.04 + r() * 0.1 : 0.02 + r() * 0.025);
+      const tinte = 0.8 + r() * 0.16, lado = 0.74 + r() * 0.16;
+      for (const m of miembros) Object.assign(m, { h, incl, ox, oz, tinte, lado });
+    }
+  }
+
+  // 2) las celdas de roca se juntan en ROCAS de tamaños muy distintos (losas grandes, bloques medianos, piedras).
+  //    Diagrama de potencia: los bordes salen rectos y largos, como los cortes de roca del logo.
+  const semRoca = [];
+  for (let n = 0; n < 6000 && semRoca.length < 260; n++) {
+    const x = (r() * 2 - 1) * RX, z = CZ + (r() * 2 - 1) * RZ;
+    if (radio(x, z) > 1.02) continue;
+    const cerca = cercano(S, x, z).d < REPISA + 0.15;
+    const tam = cerca ? 0.17 + 0.16 * r() : 0.14 + 0.42 * Math.pow(r(), 1.5);
+    if (semRoca.some(s => Math.hypot(s.x - x, s.z - z) < 0.62 * Math.max(tam, s.tam))) continue;
+    semRoca.push({ x, z, tam, w: tam * tam * 0.85, k: semRoca.length });
+  }
+  // cada celda de roca se parte por los bordes RECTOS de las rocas: así las paredes son planos largos,
+  // no el zigzag de las celdas chicas. Una pieza por roca que toca la celda.
+  const potencia = (x, z, s) => (x - s.x) ** 2 + (z - s.z) ** 2 - s.w;
+  const piezas = [];
+  for (const B of celdas) {
+    if (B.tipo !== 'roca') { piezas.push(B); continue; }
+    const pts = [[B.x, B.z], ...B.poly];
+    const cerca = semRoca.filter(s => Math.abs(s.x - B.x) < 1.3 && Math.abs(s.z - B.z) < 1.3);
+    const cand = new Set();
+    for (const [x, z] of pts) {
+      let md = Infinity, mk = 0;
+      for (const s of cerca) { const d = potencia(x, z, s); if (d < md) { md = d; mk = s.k; } }
+      cand.add(mk);
+    }
+    for (const k of cand) {
+      const sk = semRoca[k];
+      let poly = B.poly;
+      cerca.forEach(sm => {
+        const m = sm.k;
+        if (m === k || poly.length < 3) return;
+        // potencia(p, k) <= potencia(p, m)  →  a·x + b·z + c <= 0
+        const a = 2 * (sm.x - sk.x), b = 2 * (sm.z - sk.z);
+        const c = sk.x * sk.x + sk.z * sk.z - sk.w - (sm.x * sm.x + sm.z * sm.z - sm.w);
+        poly = recortarLinea(poly, a, b, c);
+      });
+      if (poly.length < 3) continue;
+      const cx = poly.reduce((t, q) => t + q[0], 0) / poly.length, cz = poly.reduce((t, q) => t + q[1], 0) / poly.length;
+      piezas.push({ ...B, x: cx, z: cz, poly, roca: k, tinte: 0.9 + r() * 0.1 });
+    }
+  }
+  const rocas = new Map();
+  for (const B of piezas) {
+    if (B.tipo !== 'roca') continue;
+    const clave = B.roca * 16 + (B.vAba + 1);        // una roca no cruza el sendero
+    if (!rocas.has(clave)) rocas.set(clave, []);
+    rocas.get(clave).push(B);
+  }
+
+  // 3) cada roca: una altura y un techo inclinado compartidos; las celdas chicas quedan como lajas del techo
+  for (const [clave, miembros] of rocas) {
+    const s = semRoca[Math.floor(clave / 16)];
+    const ox = miembros.reduce((a, b) => a + b.x, 0) / miembros.length, oz = miembros.reduce((a, b) => a + b.z, 0) / miembros.length;
+    const piso = Math.max(...miembros.map(b => b.piso)), tope = Math.min(...miembros.map(b => b.tope));
+    const base = miembros.reduce((a, b) => a + b.base, 0) / miembros.length;
+    let h = base + (fbm(ox * 1.7, oz * 1.7, 91) - 0.5) * 0.7 + (r() - 0.5) * 0.25;
+    // agujas: piedras chicas y altas con el techo muy inclinado, donde no tapan una vuelta de arriba
+    const aguja = s.tam < 0.24 && miembros.length <= 8 && tope - h > 0.45 && r() < 0.55;
+    if (aguja) h += 0.3 + r() * 0.35;
+    const k = aguja ? 1.3 : 0.45;
+    const incl = [(r() - 0.5) * k, (r() - 0.5) * k];
+    let arriba = 0, abajo = 0;
+    for (const b of miembros) for (const p of b.poly) {
+      const o = incl[0] * (p[0] - ox) + incl[1] * (p[1] - oz);
+      arriba = Math.max(arriba, o); abajo = Math.min(abajo, o);
+    }
+    h = Math.min(h, tope - arriba - r() * 0.04);
+    h = Math.max(h, piso - abajo);
+    if (piso - abajo > tope - arriba) h = tope - arriba;
+    const tinte = 0.86 + r() * 0.14, lado = 0.84 + r() * 0.16;
+    for (const b of miembros) Object.assign(b, { h: h + (r() - 0.5) * 0.012, incl, ox, oz, tinte: tinte * (0.965 + r() * 0.05), lado });
+  }
+  for (const B of piezas) {
+    if (B.rc > 0.97) B.h = Math.min(B.h, relieve(B.x, B.z) * 0.6);
+    B.h = Math.max(0, B.h);
+  }
+  const bloques = piezas;
+  // altura en (x,z): la pieza que lo contiene (entre las de la celda chica más cercana)
+  const porCelda = new Map();
+  piezas.forEach(B => { const k = B.celda; if (!porCelda.has(k)) porCelda.set(k, []); porCelda.get(k).push(B); });
+  const alturaEn = (x, z) => {
+    let mk = -1, md = 9;
+    for (const k of vecinos(x, z, SEP * 1.6)) { const d = (sem[k][0] - x) ** 2 + (sem[k][1] - z) ** 2; if (d < md) { md = d; mk = k; } }
+    const lista = porCelda.get(mk) || [];
+    const B = lista.find(b => dentroDe(b.poly, x, z)) || lista[0];
+    return B ? B.h + B.incl[0] * (x - B.ox) + B.incl[1] * (z - B.oz) : 0;
+  };
+  return { bloques, alturaEn };
 }
 
 // ---- texturas de luz y niebla ------------------------------------------------------------------
@@ -240,51 +465,41 @@ export function montar(caja, opciones = {}) {
   giro.add(mundo);
   escena.add(giro);
 
-  // ---- malla del relieve (triángulos sueltos para colorear cada cara) ----
+  // ---- los bloques de roca (triángulos sueltos para colorear cada cara) ----
   const S = construirSendero();
-  const N = 150, X0 = -3.3, X1 = 3.3, Z0 = -2.9, Z1 = 3.6;
-  const vx = new Float32Array((N + 1) * (N + 1)), vz = new Float32Array(vx.length), vy = new Float32Array(vx.length);
-  const vd = new Float32Array(vx.length), vs = new Float32Array(vx.length);
-  const celda = (X1 - X0) / N;
-  for (let j = 0; j <= N; j++) for (let i = 0; i <= N; i++) {
-    const k = j * (N + 1) + i;
-    const borde = i === 0 || j === 0 || i === N || j === N;
-    const x = X0 + i * celda + (borde ? 0 : (r() - 0.5) * celda * 0.5);
-    const z = Z0 + j * ((Z1 - Z0) / N) + (borde ? 0 : (r() - 0.5) * celda * 0.5);
-    const { h, c } = alturaFinal(S, x, z);
-    vx[k] = x; vz[k] = z; vy[k] = h; vd[k] = c.d; vs[k] = c.s;
-  }
+  const { bloques, alturaEn } = construirBloques(S, r);
   const pos = [], colores = [];
-  const col = new Color(), n = new Vector3(), a = new Vector3(), b = new Vector3();
-  const dentroBase = k => Math.hypot(vx[k] / RX, (vz[k] - CZ) / RZ) < 1.12 || vd[k] < 0.5;
-  const tri = (p, q, s) => {
-    if (!dentroBase(p) && !dentroBase(q) && !dentroBase(s)) return;
-    if (vy[p] < 0.02 && vy[q] < 0.02 && vy[s] < 0.02 && Math.min(vd[p], vd[q], vd[s]) > MEDIO) return;   // suelo: lo cubre la neblina
-    a.set(vx[q] - vx[p], vy[q] - vy[p], vz[q] - vz[p]);
-    b.set(vx[s] - vx[p], vy[s] - vy[p], vz[s] - vz[p]);
-    n.crossVectors(b, a).normalize();
-    if (n.y < 0) n.negate();
-    const d = (vd[p] + vd[q] + vd[s]) / 3;
-    const h = (vy[p] + vy[q] + vy[s]) / 3;
-    const enSendero = vd[p] < MEDIO && vd[q] < MEDIO && vd[s] < MEDIO;
-    if (enSendero && n.y > 0.62) {
-      col.setHex(SENDERO[Math.floor(r() * SENDERO.length)]).multiplyScalar(0.93 + r() * 0.1);
-      if (h < 0.2) col.lerp(new Color(PAPEL), Math.pow((0.2 - h) / 0.2, 1.4));
-    }
-    else if (d < MEDIO + 0.07 && n.y > 0.55) col.setHex(BORDE).multiplyScalar(0.96 + r() * 0.04);
-    else if (h < 0.025) col.setHex(PAPEL);
-    else {
-      const plano = paso(0.55, 0.85, n.y);
-      col.setHex(PIEDRA_LADO).lerp(new Color(PIEDRA_ARRIBA), plano);
-      col.multiplyScalar(0.86 + r() * 0.16 + (n.x - n.z * 0.2) * 0.04);
-      col.r *= 1.01; col.b *= 0.99;
-      if (h < 0.35) col.lerp(new Color(PAPEL), (0.35 - h) * 1.6);   // la base se funde con la neblina
-    }
-    for (const v of [p, q, s]) { pos.push(vx[v], vy[v], vz[v]); colores.push(col.r, col.g, col.b); }
+  const papel = new Color(PAPEL), ta = new Vector3(), tb = new Vector3(), tn = new Vector3();
+  // agrega un triángulo con la cara hacia `hacia` (así se ve con el material de una sola cara)
+  const cara = (p, q, s, cp, cq, cs, hacia) => {
+    ta.set(q[0] - p[0], q[1] - p[1], q[2] - p[2]); tb.set(s[0] - p[0], s[1] - p[1], s[2] - p[2]);
+    tn.crossVectors(ta, tb);
+    if (tn.x * hacia[0] + tn.y * hacia[1] + tn.z * hacia[2] < 0) { [q, s] = [s, q]; [cq, cs] = [cs, cq]; }
+    pos.push(...p, ...q, ...s);
+    colores.push(cp.r, cp.g, cp.b, cq.r, cq.g, cq.b, cs.r, cs.g, cs.b);
   };
-  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
-    const k = j * (N + 1) + i, k2 = k + N + 1;
-    if ((i + j) % 2) { tri(k, k2, k + 1); tri(k + 1, k2, k2 + 1); } else { tri(k, k2, k2 + 1); tri(k, k2 + 1, k + 1); }
+  const neblina = (c, y) => (y < 0.4 ? c.clone().lerp(papel, Math.pow((0.4 - y) / 0.4, 1.4) * 0.85) : c);
+  for (const B of bloques) {
+    if (B.h < 0.015 || B.poly.length < 3) continue;
+    const techo = ([px, pz]) => [px, B.h + B.incl[0] * (px - B.ox) + B.incl[1] * (pz - B.oz), pz];
+    let ct;
+    if (B.tipo === 'roca') ct = new Color(PIEDRA_ARRIBA).multiplyScalar(B.tinte);
+    else if (B.tipo === 'bajo') ct = B.c.grieta ? new Color(0x5d5850) : new Color(SENDERO[2]).multiplyScalar(0.8);
+    else ct = new Color(BORDE).multiplyScalar(B.tipo === 'bordillo' ? B.tinte * 1.04 : 0.88 + r() * 0.1);
+    ct = neblina(ct, B.h);
+    const centro = techo([B.x, B.z]);
+    const tope = B.poly.map(techo);
+    for (let i = 0; i < tope.length; i++) cara(centro, tope[i], tope[(i + 1) % tope.length], ct, ct, ct, [0, 1, 0]);
+    // paredes hasta el suelo: más oscuras abajo, como el logo
+    const lado = new Color(B.tipo === 'bordillo' ? BORDE : PIEDRA_LADO).multiplyScalar(B.lado);
+    const ca = neblina(lado, B.h), cb = neblina(lado.clone().multiplyScalar(0.66), 0);
+    for (let i = 0; i < tope.length; i++) {
+      const p = tope[i], q = tope[(i + 1) % tope.length];
+      const fuera = [(p[0] + q[0]) / 2 - B.x, 0, (p[2] + q[2]) / 2 - B.z];
+      const p0 = [p[0], 0, p[2]], q0 = [q[0], 0, q[2]];
+      cara(p, q, q0, ca, ca, cb, fuera);
+      cara(p, q0, p0, ca, cb, cb, fuera);
+    }
   }
   const geo = new BufferGeometry();
   geo.setAttribute('position', new Float32BufferAttribute(pos, 3));
@@ -294,8 +509,50 @@ export function montar(caja, opciones = {}) {
   montana.castShadow = montana.receiveShadow = true;
   mundo.add(montana);
 
-  const alturaEn = (x, z) => alturaFinal(S, x, z).h;
+  // ---- el sendero: pasto verde metido entre los bordillos, apoyado en los bloques de abajo ----
+  // No flota: sus costados bajan dentro de la roca y en cada grieta se corta con una pared.
+  {
+    const P = S.pts, n0 = P.length;
+    const lado = P.map((_, i) => {
+      const a0 = P[Math.max(0, i - 2)], a1 = P[Math.min(n0 - 1, i + 2)];
+      const tx = a1[0] - a0[0], tz = a1[1] - a0[1], l = Math.hypot(tx, tz) || 1;
+      return [-tz / l, tx / l];
+    });
+    const ancho = P.map((_, i) => MEDIO * (1.06 + (fbm(i * 0.21, 3.7, 71) - 0.5) * 0.06));   // se mete bajo los bordillos
+    const pt = (i, s, dy = 0) => [P[i][0] + lado[i][0] * ancho[i] * s, S.escalon[i] + dy, P[i][1] + lado[i][1] * ancho[i] * s];
+    const cp = [], cc = [];
+    const poner = (p, q, s, c) => { cp.push(...p, ...q, ...s); cc.push(c.r, c.g, c.b, c.r, c.g, c.b, c.r, c.g, c.b); };
+    const quad = (a, b, c, d, col) => { poner(a, b, c, col); poner(a, c, d, col); };
+    const piedra = new Color(PIEDRA_LADO).multiplyScalar(0.8);
+    for (let i = 0; i < n0 - 1; i++) {
+      if (S.grieta[i] || S.grieta[i + 1]) {
+        // pared del corte, del lado donde sigue el sendero
+        if (!S.grieta[i]) quad(pt(i, -1), pt(i, 1), pt(i, 1, -0.6), pt(i, -1, -0.6), piedra);
+        if (!S.grieta[i + 1]) quad(pt(i + 1, 1), pt(i + 1, -1), pt(i + 1, -1, -0.6), pt(i + 1, 1, -0.6), piedra);
+        continue;
+      }
+      // pasto continuo: el tono cambia despacio a lo largo del sendero (sin franjas que parezcan gradas)
+      const verde = new Color(SENDERO[0]).multiplyScalar(0.9 + fbm(S.largo[i] * 1.6, 0.5, 73) * 0.2);
+      const h = S.escalon[i];
+      if (h < 0.22) verde.lerp(papel, Math.pow((0.22 - h) / 0.22, 1.3));
+      // en un escalón, la cara que sube queda en sombra (verde oscuro), no como una franja pintada
+      const sube = S.escalon[i + 1] - S.escalon[i] > 0.02;
+      quad(pt(i, -1), pt(i + 1, -1), pt(i + 1, 1), pt(i, 1), sube ? verde.clone().multiplyScalar(0.55) : verde);
+      const b0 = -Math.min(0.3, S.escalon[i]), b1 = -Math.min(0.3, S.escalon[i + 1]);   // nunca bajo el suelo
+      quad(pt(i, 1), pt(i + 1, 1), pt(i + 1, 1, b1), pt(i, 1, b0), piedra);
+      quad(pt(i + 1, -1), pt(i, -1), pt(i, -1, b0), pt(i + 1, -1, b1), piedra);
+    }
+    const g = new BufferGeometry();
+    g.setAttribute('position', new Float32BufferAttribute(cp, 3));
+    g.setAttribute('color', new Float32BufferAttribute(cc, 3));
+    g.computeVertexNormals();
+    const cinta = new Mesh(g, new MeshStandardMaterial({ vertexColors: true, roughness: 0.85, flatShading: true, side: DoubleSide }));
+    cinta.castShadow = false; cinta.receiveShadow = true;
+    mundo.add(cinta);
+  }
+
   const pendiente = (x, z) => Math.hypot(alturaEn(x + 0.05, z) - alturaEn(x - 0.05, z), alturaEn(x, z + 0.05) - alturaEn(x, z - 0.05)) / 0.1;
+  const lejosDelSendero = (x, z, m) => cercano(S, x, z).d > m;
 
   // ---- la gran piedra, piedritas y agaves ----
   const roca = new MeshStandardMaterial({ color: 0xdedbd4, roughness: 0.9, flatShading: true });
@@ -306,12 +563,23 @@ export function montar(caja, opciones = {}) {
     for (let i = 0; i < p.count; i++) { const k = 0.86 + rp() * 0.26; p.setXYZ(i, p.getX(i) * k, p.getY(i) * k, p.getZ(i) * k); }
     geoPiedra.computeVertexNormals();
   }
+  // la gran piedra: en una repisa a la derecha, lejos del sendero (nunca lo tapa)
+  let PX = 0.78, PZ = 0.78;
   {
-    const x = 0.78, z = 0.78;
+    let mejor = Infinity;
+    for (let k = 0; k < 400; k++) {
+      const x = 0.9 + r() * 1.3, z = -0.4 + r() * 1.5;
+      if (!lejosDelSendero(x, z, REPISA + 0.2) || pendiente(x, z) > 1.3 || alturaEn(x, z) < 0.6) continue;
+      const e = Math.hypot(x - 1.35, z - 0.55);
+      if (e < mejor) { mejor = e; PX = x; PZ = z; }
+    }
+  }
+  {
+    const x = PX, z = PZ;
     const m = new Mesh(geoPiedra, roca);
-    m.scale.set(0.34, 0.3, 0.3);
+    m.scale.set(0.2, 0.18, 0.18);
     m.rotation.set(0.4, 0.7, 0.1);
-    m.position.set(x, alturaEn(x, z) + 0.2, z);
+    m.position.set(x, alturaEn(x, z) + 0.12, z);
     m.castShadow = m.receiveShadow = true;
     mundo.add(m);
   }
@@ -323,8 +591,8 @@ export function montar(caja, opciones = {}) {
     const rr = Math.hypot(x / RX, (z - CZ) / RZ);
     if (rr > 0.9) continue;
     const c = cercano(S, x, z);
-    if (c.d < MEDIO + 0.12) continue;
-    if (Math.hypot(x - 0.78, z - 0.78) < 0.4) continue;
+    if (c.d < REPISA + 0.07) continue;
+    if (Math.hypot(x - PX, z - PZ) < 0.3) continue;
     if (pendiente(x, z) > 0.9) continue;
     const y = alturaEn(x, z);
     if (y < 0.08) continue;
@@ -382,8 +650,10 @@ export function montar(caja, opciones = {}) {
   // ---- neblina en la base y nubes detrás ----
   const texBruma = bruma();
   const nieblas = new Group();
-  for (const [ang, rad, y, s, op] of [[0, 2.7, 0.1, 3.6, 1], [0.9, 2.6, 0.15, 3.2, 0.95], [-0.9, 2.6, 0.15, 3.2, 0.95], [1.9, 2.5, 0.2, 3, 0.9], [-1.9, 2.5, 0.2, 3, 0.9], [3.1, 2.4, 0.2, 3, 0.9], [0.4, 3.2, -0.1, 4.6, 1], [-0.4, 3.2, -0.1, 4.6, 1]]) {
-    const sp = new Sprite(new SpriteMaterial({ map: texBruma, transparent: true, depthWrite: false, opacity: op }));
+  // la neblina va delante de la base y se dibuja SIEMPRE encima (sin prueba de profundidad): así envuelve el pie
+  // de la montaña igual desde cualquier lado, en vez de cortar las rocas y dejar parches de luz al girar.
+  for (const [ang, rad, y, s, op] of [[0, 2.6, 0.05, 3.8, 0.95], [0.85, 2.5, 0.08, 3.2, 0.85], [-0.85, 2.5, 0.08, 3.2, 0.85], [1.6, 2.4, 0.1, 2.6, 0.6], [-1.6, 2.4, 0.1, 2.6, 0.6], [0.35, 3.1, -0.15, 4.8, 1], [-0.35, 3.1, -0.15, 4.8, 1]]) {
+    const sp = new Sprite(new SpriteMaterial({ map: texBruma, transparent: true, depthWrite: false, depthTest: false, opacity: op }));
     sp.userData = { ang, rad, y };
     sp.scale.set(s, s * 0.42, 1);
     sp.renderOrder = 2;
@@ -418,7 +688,7 @@ export function montar(caja, opciones = {}) {
     camara.aspect = ancho / alto;
     const tan = Math.tan((camara.fov * Math.PI) / 360);
     const d = Math.max(6.6, 6.6 / camara.aspect) / (2 * tan);
-    const elev = 0.36;
+    const elev = 0.5;
     camara.position.set(0, 1.8 + Math.sin(elev) * d, Math.cos(elev) * d);
     camara.lookAt(0, 1.8, 0);
     camara.updateProjectionMatrix();

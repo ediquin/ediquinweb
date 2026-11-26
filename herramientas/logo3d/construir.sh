@@ -4,7 +4,7 @@
 # Uso: bash construir.sh [versión] → ../../js/montana3d-<versión>.js  y  lab/montana3d-lab.js
 set -euo pipefail
 cd "$(dirname "$0")"
-VERSION="${1:-20261124-3}"
+VERSION="${1:-20261124-4}"
 NM=/home/ediquin/Documents/Claude_projects/Personal_projects/Nativzar_videos/video/felicidad_huesos_v2/node_modules
 for SALIDA in "../../js/montana3d-$VERSION.js" lab/montana3d-lab.js; do
   NODE_PATH="$NM" "$NM/.bin/esbuild" montana3d.js --bundle --format=esm --minify --target=es2020 \

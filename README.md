@@ -115,8 +115,82 @@ Pedido del titular al revisar la segunda versión:
 
 En el navegador de la app, con GPU, se comprobó que el 3D carga, gira al arrastrar y oculta el aviso al tocarlo. A 375 px no hay desborde horizontal.
 
+## Cuarta versión del 24/11/2026: sendero despejado y galería de opciones
+
+- **Logo 3D, el sendero:** el titular notó que la roca asomaba puntiaguda sobre el sendero y lo tapaba en partes. Ahora:
+  - el sendero es una cinta verde continua, con bordillos bajos de piedra clara;
+  - las curvas cerradas son redondas;
+  - el corte de la roca toma el mínimo de **todos** los tramos cercanos, así ninguna roca queda por encima de un tramo y siempre hay paso libre;
+  - la gran piedra, las piedritas y los agaves se colocan lejos del sendero.
+- **Uniformes:** queda solo la polera Trazo andino (vista de catálogo). Los conjuntos salieron hasta mejorarlos.
+- **Animación:** se quitó la escena «Un camino trazado por Dios mismo». El titular la descartó porque es de la versión pendiente del episodio de Elías, y el personaje camina raro.
+- **Galería de opciones** (`herramientas/galeria_opciones.py` → `opciones/index.html`, solo local, en `.gitignore`):
+  - 1068 imágenes y 4 animaciones recientes de Elías, para que el titular marque qué entra al portafolio;
+  - el botón «Copiar mi selección» copia los números;
+  - solo lee las carpetas de origen.
+- **QA:** `qa_portafolio.mjs` dio **69 bien, 0 mal**. La prueba del carrusel solo corre si hay más de una prenda.
+
+## Quinta versión del 24/11/2026: lo elegido en la galería y el logo en bloques
+
+El titular eligió en la galería la animación de Horeb, el afiche del curso de directivas y la polera del Club Central.
+
+- **Logo 3D, tercera forma** (`herramientas/logo3d/montana3d.js`, empaquetado en `js/montana3d-20261124-4.js`):
+  - **Por qué:** el titular notó que la cinta del sendero parecía flotar y hasta tenía sombra propia. Pidió que el sendero rodee toda la montaña, que sea angosto y que tenga obstáculos, y que se parezca más al dibujo original.
+  - **Montaña:** se hizo con bloques de roca, como el logo: celdas de Voronoi de techo plano y paredes verticales, más oscuras abajo.
+  - **Sendero:** es angosto (0,24 de ancho) y da 2,2 vueltas en espiral. Va metido entre bordillos de piedra clara, que son más altos por dentro y bajos por fuera para no taparlo.
+    - Arriba de cada vuelta hay una pared y abajo una caída.
+    - La pendiente alterna tramos casi planos y otros empinados.
+    - El sendero se mete y se sale un poco, para no formar anillos.
+    - Cuatro grietas cortan el sendero y sus bordillos.
+  - **Sin flotar:** los costados del sendero bajan dentro de la roca, nunca bajo el suelo. Cada bloque queda acotado por las vueltas vecinas: nunca supera a la de arriba ni baja de la de abajo.
+  - La cámara mira un poco más desde arriba.
+  - **Ajuste del mismo día: rocas irregulares.** El titular vio que la montaña parecía hecha toda de hexágonos iguales, como columnas de basalto, nada natural. Ahora:
+    - **Rocas de tamaños mezclados:** las celdas chicas (0,085) se agrupan en rocas de muy distintos tamaños (de 0,14 a 0,56), con un diagrama de potencia.
+    - **Paredes rectas:** cada celda se parte por los bordes rectos de su roca, así las paredes son planos largos.
+    - **Techos:** cada roca tiene un techo inclinado propio, y las celdas chicas quedan como lajas con grietas, como el empedrado del logo.
+    - **Borde del sendero:** la orilla exterior de los bordillos sigue una línea paralela al sendero.
+    - **Agujas:** hay algunas piedras altas con el techo muy inclinado, solo donde no tapan la vuelta de arriba.
+    - **Zigzag:** el sendero hace quiebres rectos, con una onda triangular.
+    - **Velocidad:** con rejillas de búsqueda para los tramos y las rocas, el armado tarda unos 0,28 s en este equipo (antes, 0,53 s).
+    - **Respaldo:** la versión de hexágonos quedó en `herramientas/logo3d/anteriores/montana3d-v5-hexagonos.js`.
+  - **Ajuste del 25/11/2026: sendero, bordillos y luz de la base.**
+    - **Por qué:** el titular vio que el sendero y las piedras de al lado parecían escalonados («muchas gradas») y que, al girar el modelo, la parte baja tenía una luz rara.
+    - **Luz rara en la base:** tenía dos causas.
+      - La neblina eran imágenes planas fijas alrededor del pie de la montaña. Al girar, cortaban las rocas: unas quedaban delante y otras detrás, y salían parches de luz.
+      - La primera vuelta del sendero iba por el borde de la base, sin roca debajo, y se veía como una franja pálida.
+    - **Neblina:** ahora va solo delante y a los costados, y se dibuja siempre encima (`depthTest: false`). Envuelve el pie igual desde cualquier lado.
+    - **Entrada del sendero:** sale de la neblina al frente y entra derecho al cerro. La espiral empieza sobre roca.
+    - **Gradas falsas:** el pasto tenía franjas de verdes alternados cada dos tramos, y eso parecía una escalera. Ahora el tono cambia despacio y de forma continua.
+    - **Escalones reales:** solo donde la subida pasa de 0,21. Son de 0,075 de alto, con la contrahuella en sombra verde. En el resto, el sendero queda llano o en rampa suave. La roca y los bordillos usan la subida lisa (`S.alt`); el pasto usa la escalonada (`S.escalon`).
+    - **Bordillos:** son piedras enteras, de 0,14 a 0,34 de largo, con un techo que sigue la subida y su propio tono e inclinación, no un rosario de piedritas a distinta altura.
+      - Las orillas del pasto y de los bordillos son cortes rectos, paralelos al sendero.
+      - Cada piedra tiene su ancho, así la pared de roca detrás se quiebra en grietas verticales donde cambia de piedra.
+    - Armado: unos 0,3 s.
+    - Respaldo de la versión anterior: `herramientas/logo3d/anteriores/montana3d-v6-rocas.js`.
+  - La versión anterior quedó en `herramientas/logo3d/anteriores/montana3d-v4-cinta.js`.
+  - La imagen fija nueva es `nativzar-3d-v3-480/900.webp`.
+- **Polera del Club Central** (`herramientas/polera3d/`):
+  - **Origen:** solo había láminas planas, `Polera parte delantera.jpg.png` y `Polera Parte tracera.jpg` en `/srv/respaldo/archivo/05_Iglesia_IASD/1_Conquistadores/Club Central/Polera/`.
+  - **Silueta:** se dedujo de dónde corta el estampado y está en `silueta.py`.
+  - **Prenda 3D:** `render_polera.py` arma la prenda en Blender 5.3 (Cycles):
+    - torso y mangas son piezas infladas por separado y la manga monta sobre la sisa;
+    - el escote lleva cuello acanalado y se ve el interior;
+    - tiene costuras y pespuntes en relieve (`preparar_texturas.py`), con luz de estudio sobre fondo gris cálido.
+  - **Comando:** `python3 preparar_texturas.py && blender -b --factory-startup --python render_polera.py -- 128`, que tarda unos 50 s.
+  - **Ajustes pendientes:** las mangas todavía se ven cortas y rígidas.
+  - **En la página:** entra al carrusel de Uniformes, con flechas, como segunda prenda.
+- **Afiche** «Curso de Entrenamiento Básico de Directivas» (oficial, MBON, enero de 2026): es el cuarto flyer. Los flyers pasan a 4 columnas (2 en el celular) y los escudos a 5 de 12 columnas.
+- **Animación:** «Elías en el monte Horeb», 10 s de `horeb_rig_v07.mp4` (de 5,4 s a 15,6 s): el monte, el viento, el terremoto y el fuego. Ocupa todo el ancho, con el texto al lado.
+- Inglés regenerado: 203 textos.
+- QA: **71 bien, 0 mal**.
+- Verificación en el navegador local:
+  - el logo 3D carga con aceleración, con sombras, y gira;
+  - el carrusel avanza;
+  - la animación arranca sola al verse.
+
 ### Pendiente del titular
 
+- Buscar los otros diseños de la parca (con otros colores) y decir si las mangas de la polera del Club Central necesitan otro ajuste.
 - Revisar la trayectoria nueva (tomada del CV) y la traducción al inglés.
 - Pasar la ConquisRuta enviada con las actividades en cada papiro, si la tiene en el teléfono o en WhatsApp.
 - Si quiere una intro nueva hecha con Google Flow, generarla en su cuenta (ese servicio no se usa desde aquí).

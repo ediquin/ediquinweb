@@ -50,7 +50,7 @@ def logo_nativzar():
 logo_nativzar()
 # Logo 3D (segunda versión, Three.js): imagen fija capturada con herramientas/logo3d/capturar_poster.mjs
 if (RAIZ / 'herramientas/logo3d/poster-montana3d.png').exists():
-    webp(RAIZ / 'herramientas/logo3d/poster-montana3d.png', 'nativzar-3d-v2', [480, 900])
+    webp(RAIZ / 'herramientas/logo3d/poster-montana3d.png', 'nativzar-3d-v3', [480, 900])
 webp(WEB / 'nativzar/img/logo3d-nativzar-20261124-1-1080.webp', 'nativzar-3d', [480, 900])
 # 02 Video
 canal = WEB / 'nativzar/img/canal'
@@ -90,28 +90,31 @@ for n, f in (('flyer-excursion', 'output/afiches/club-central-excursion-v4.png')
              ('flyer-recepcion', 'output/recepcion-sabado-2026-09-18/afiche-v5.png'),
              ('flyer-dia-mundial', 'output/dia-mundial-conquistador-2026-09-19/afiche-club-central-v1.png')):
     webp(FLYER / f, n, [420, 900], q=78)
+# Curso de Entrenamiento Básico de Directivas (MBON, enero de 2026), versión oficial del respaldo
+DIR = Path('/srv/respaldo/archivo/05_Iglesia_IASD/Diseño_y_flyers/Saved Pictures/Curso de Entrenamiento Basico de Directivas - oficial.png')
+if DIR.exists():
+    webp(DIR, 'flyer-directivas', [420, 900], q=78)
 for n, f in (('parche-convencion', 'assets/logos_ministerios_a_revisar_y_ordenar/parche_prototipo.jpg'),
              ('escudo-gmm', 'output/curso-gmm-gmma/escudo-gmm-gmma-v4-minimalista.png'),
              ('escudo-cead-liderazgo', 'output/logo-cead-conquistadores-2026-10-13/logo-cead-fixed-v2-sin-achocalla.png')):
     webp(FLYER / f, n, [400, 800], q=80)
 # Indumentaria: las vistas de catálogo (prenda real), en un carrusel
-for n, f in (('ropa-polera-trazo-andino', 'output/poleras-coordinadores-mbon-campori/trazo-andino-cordillera-rev07-catalogo.png'),
-             ('ropa-conjunto-v01', 'output/conjunto-trazo-andino/conjunto-trazo-andino-v01-catalogo.png'),
-             ('ropa-conjunto-salvia', 'output/conjunto-trazo-andino/paleta-01-salvia-y-arena-catalogo.png'),
-             ('ropa-conjunto-petroleo', 'output/conjunto-trazo-andino/paleta-02-petroleo-y-piedra-pantalon-franjas-catalogo.png'),
-             ('ropa-conjunto-granate', 'output/conjunto-trazo-andino/paleta-03-granate-y-oliva-catalogo.png')):
+for n, f in (('ropa-polera-trazo-andino', 'output/poleras-coordinadores-mbon-campori/trazo-andino-cordillera-rev07-catalogo.png'),):
     webp(FLYER / f, n, [560, 1100], q=80)
-# Animación propia: «Un camino trazado por Dios mismo» del episodio horizontal de Nativzar (Blender), 6:24–6:37.
-# (La intro del club de DaVinci Resolve se quitó: el titular aclaró que no la hizo él.)
-ep = PP / 'Nativzar_videos/video/episodio01/episodio01_blender.mp4'
-if ep.exists():
+# Polera del Club Central: la lámina plana del respaldo puesta en una prenda 3D (herramientas/polera3d/)
+PC = RAIZ / 'herramientas/polera3d/salida/polera-club-central.png'
+if PC.exists():
+    webp(PC, 'ropa-polera-club-central', [560, 1100], q=80)
+# Escena de Elías en el monte Horeb (Nativzar, v07 del 10/11/2026): el viento, el terremoto y el fuego, 5.4–15.6 s
+HO = PP / 'Nativzar_videos/video/pruebas/horeb_rig/horeb_rig_v07.mp4'
+if HO.exists():
     import subprocess
-    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', '384', '-t', '13', '-i', str(ep), '-an', '-vf', 'scale=640:-2,fps=24',
-                    '-c:v', 'libx264', '-crf', '28', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
-                    str(VID / 'camino-elias-640.mp4')], check=True)
-    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', '388', '-i', str(ep), '-frames:v', '1', '-vf', 'scale=1280:-2',
-                    str(OUT / 'camino-elias.png')], check=True)
-    webp(OUT / 'camino-elias.png', 'camino-elias', [640, 1200]); (OUT / 'camino-elias.png').unlink()
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', '5.4', '-t', '10.2', '-i', str(HO), '-an', '-vf',
+                    'scale=960:-2,fps=24,fade=t=in:st=0:d=0.3,fade=t=out:st=9.8:d=0.4', '-c:v', 'libx264', '-crf', '27',
+                    '-preset', 'slow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', str(VID / 'horeb-elias-960.mp4')], check=True)
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', '13.2', '-i', str(HO), '-frames:v', '1', '-vf', 'scale=1280:-2',
+                    str(OUT / 'horeb-elias.png')], check=True)
+    webp(OUT / 'horeb-elias.png', 'horeb-elias', [640, 1200]); (OUT / 'horeb-elias.png').unlink()
 print('listo')
 
 # Capturas de pantalla de los sitios (1440×900). La de Kauxte se tomó del sitio local el 24/11/2026;
