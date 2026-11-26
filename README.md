@@ -251,7 +251,14 @@ axe mide el contraste sin la animación de aparición, porque esa animación dej
 - **`qa_portafolio.mjs` sobre https://ediquin.github.io/ediquinweb/: 187 bien, 0 mal.**
 - **Para revertir:** `git revert e142a84` y subir, o volver `master` a `274f751`.
 
+**Ajuste posterior del 26/11/2026: certificados en LinkedIn.**
+- El titular indicó que sus certificados y el trofeo TechStar están enlazados en su LinkedIn.
+- La sección 06 enlaza a `linkedin.com/in/ediquin/details/certifications/`, y la tarjeta TechStar a `…/details/honors/`. Así, cuando sume un certificado en LinkedIn, el portafolio queda al día sin editarlo.
+- No se copiaron los enlaces de cada certificado.
+- QA local: 187 bien, 0 mal. Inglés: 350 textos.
+
 ### Pendiente del titular
+- Agregar con tiempo el resto de los requisitos de la sexta versión: enlaces de certificados que no estén en LinkedIn, un botón para descargar el CV si lo quiere, y revisar la cifra «Apps y herramientas: 7» y las tecnologías de Nativzar MJ.
 
 - Buscar los otros diseños de la parca (con otros colores) y decir si las mangas de la polera del Club Central necesitan otro ajuste.
 - Revisar la trayectoria nueva (tomada del CV) y la traducción al inglés.

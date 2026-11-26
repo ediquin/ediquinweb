@@ -763,6 +763,8 @@ p { margin: 0; }
 .cert li span { display: inline-block; margin-left: 6px; color: var(--gris); font-size: 13.5px; }
 .cert-premio { background: var(--tinta); color: var(--claro); border-color: transparent; }
 .cert-premio .cert-quien { color: var(--acento-claro); }
+.cert-premio .enlace { display: inline-block; margin-top: 12px; color: var(--acento-claro); font-size: 15px; }
+.cert-mas { margin-top: 24px; color: var(--gris); }
 .cert-premio > p:not(.cert-quien) { color: var(--claro-2); }
 
 @media (max-width: 1080px) {

@@ -32,6 +32,9 @@ paginas = {c: rutas((RAIZ / c / 'index.html').read_text(encoding='utf-8'), c) fo
 # 2. Textos. Orden: primero los fragmentos largos que contienen a otros más cortos.
 PARES = [
     ('<html lang="es">', '<html lang="en">'),
+    ('>Verlo en LinkedIn <svg', '>See it on LinkedIn <svg'),
+    ('<p class="cert-mas">Los certificados están publicados en mi perfil: ', '<p class="cert-mas">The certificates are published on my profile: '),
+    ('>Ver los certificados en LinkedIn <svg', '>See the certificates on LinkedIn <svg'),
     ('aria-label="Pausar los videos"', 'aria-label="Pause the videos"'),
     # ---- 26/11/2026 (2): nombres técnicos, palabras clave y certificaciones (del CV del 26/11) ----
     ('<ul class="etiquetas etiquetas-area revelar" aria-label="Habilidades"><li>Identidad visual</li><li>Branding</li><li>Diseño editorial</li><li>Impresión</li><li>Logos 3D</li><li>Diseño de indumentaria</li><li>Canva</li><li>Figma</li><li>Blender</li><li>Three.js</li></ul>',
