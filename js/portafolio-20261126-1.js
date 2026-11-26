@@ -1,4 +1,4 @@
-/* Portafolio de ediquin · 24/11/2026. Sin librerías.
+/* Portafolio de ediquin · 24/11/2026, dividido en dos caminos el 26/11/2026. Sin librerías.
    Barra de progreso y sección activa · collage con paralaje · vista previa del índice ·
    riel de Shorts con vistas previas · animación con pausa · visor de imágenes ·
    carrusel de indumentaria · logo 3D de Nativzar (Three.js, se carga solo al acercarse). Textos en español o inglés según <html lang>. */
@@ -11,9 +11,16 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
-  /* 1. progreso de lectura y sección activa en el menú */
+  /* 0. enlaces viejos del portafolio de una sola página (…/ediquinweb/#web): llevan al camino nuevo */
+  if (document.body.dataset.pagina === 'inicio') {
+    const viejas = { diseno: 'diseno/', video: 'diseno/', foto: 'diseno/', aprendiendo: 'diseno/', web: 'software/', ia: 'software/', herramientas: 'software/' };
+    const h = location.hash.slice(1);
+    if (viejas[h]) { location.replace(viejas[h] + '#' + h); return; }
+  }
+
+  /* 1. progreso de lectura y sección activa en la barra de cada página (solo enlaces internos #…) */
   const barra = $('[data-progreso]');
-  const enlaces = $$('.menu a');
+  const enlaces = $$('.subnav a[href^="#"], .menu a[href^="#"]');
   const secciones = enlaces.map(a => $(a.getAttribute('href'))).filter(Boolean);
   let pendiente = false;
   const alDesplazar = () => {
@@ -198,6 +205,31 @@
       }).catch(() => {});   // sin WebGL acelerado: se queda la imagen fija
     }, { rootMargin: '300px 0px' });
     io.observe(m3d);
+  }
+
+  /* 9. estilos de video (diseno/): clips mudos de 4 s, como GIF pero mucho más livianos.
+     Corren solos mientras la sección está a la vista, con un botón para pausarlos (WCAG 2.2.2).
+     Con «reducir movimiento» o ahorro de datos arrancan en pausa y no se descargan. */
+  const estilos = $('[data-estilos]');
+  const estilosB = estilos && $('[data-estilos-pausa]', estilos);
+  if (estilos && estilosB) {
+    const vids = $$('video', estilos);
+    let pausado = reducir || ahorro, visible = false;
+    vids.forEach(v => v.addEventListener('playing', () => v.parentElement.classList.add('reproduce')));
+    const pintar = () => {
+      estilos.classList.toggle('en-pausa', pausado);
+      estilosB.setAttribute('aria-label', en ? (pausado ? 'Play the videos' : 'Pause the videos') : (pausado ? 'Reproducir los videos' : 'Pausar los videos'));
+    };
+    const aplicar = () => vids.forEach(v => {
+      if (visible && !pausado && !document.hidden) {
+        if (!v.src) v.src = v.dataset.src;
+        const pr = v.play(); if (pr && pr.catch) pr.catch(() => {});
+      } else if (!v.paused) v.pause();
+    });
+    estilosB.addEventListener('click', () => { pausado = !pausado; pintar(); aplicar(); });
+    if ('IntersectionObserver' in window) new IntersectionObserver(([e]) => { visible = e.isIntersecting; aplicar(); }, { threshold: 0.2 }).observe(estilos);
+    document.addEventListener('visibilitychange', aplicar);
+    pintar();
   }
 
 })();

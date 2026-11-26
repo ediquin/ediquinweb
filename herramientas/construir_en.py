@@ -1,46 +1,330 @@
 #!/usr/bin/env python3
-"""Genera en/index.html (versión en inglés) a partir de index.html (español).
+"""Genera en/, en/diseno/ y en/software/ (versión en inglés) a partir de las páginas en español.
 
 Uso: python3 herramientas/construir_en.py
 Cada par (español, inglés) debe aparecer en index.html; si un texto cambió, el script se detiene
 y dice cuál, para actualizar la traducción. Al final avisa si quedó texto que parece español.
 """
+import posixpath
 import re
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
-s = (RAIZ / 'index.html').read_text(encoding='utf-8')
+BASE = 'https://ediquin.github.io/ediquinweb/'
+# Páginas con versión en inglés (ruta de la carpeta, '' = inicio). Sus enlaces entre sí se quedan en inglés.
+PAGINAS = ['', 'diseno/', 'software/']
 
-# 1. Rutas: la página inglesa vive en en/, así que los recursos locales suben un nivel.
-s = re.sub(r'(src|href|poster|data-src|data-grande|data-vista|data-montana3d)="(?!https?:|mailto:|#|\.\./|/)([^"]+)"', r'\1="../\2"', s)
-s = re.sub(r'srcset="([^"]+)"', lambda m: 'srcset="' + re.sub(r'(^|, )(img/)', r'\1../\2', m.group(1)) + '"', s)
+def rutas(s, carpeta):
+    """La página inglesa vive en en/<carpeta>: los recursos locales suben un nivel;
+    los enlaces a otra página traducida se mantienen (apuntan a su versión inglesa)."""
+    def local(u):
+        if re.match(r'(https?:|mailto:|#|/|data:)', u):
+            return u
+        destino = posixpath.normpath(posixpath.join('/' + carpeta, u.split('#')[0] or '.'))
+        destino = destino.strip('/') + ('/' if u.split('#')[0].endswith('/') or destino == '/' else '')
+        destino = '' if destino == '/' else destino
+        return u if destino in PAGINAS else '../' + u
+    s = re.sub(r'(src|href|poster|data-src|data-grande|data-vista|data-montana3d)="([^"]+)"', lambda m: f'{m[1]}="{local(m[2])}"', s)
+    return re.sub(r'srcset="([^"]+)"', lambda m: 'srcset="' + ', '.join(local(x.strip()) for x in m[1].split(',')) + '"', s)
+
+paginas = {c: rutas((RAIZ / c / 'index.html').read_text(encoding='utf-8'), c) for c in PAGINAS}
 
 # 2. Textos. Orden: primero los fragmentos largos que contienen a otros más cortos.
 PARES = [
     ('<html lang="es">', '<html lang="en">'),
-    ('<title>Edilson Laura · ediquin — Ingeniero, diseño, video, web e IA</title>',
-     '<title>Edilson Laura · ediquin — Engineer, design, video, web and AI</title>'),
-    ('content="Portafolio de Edilson Byron Laura Mercado (ediquin), ingeniero electrónico y desarrollador full-stack: diseño gráfico y de marca, piezas para la iglesia, video, sitios web y automatización con IA. La Paz, Bolivia."',
-     'content="Portfolio of Edilson Byron Laura Mercado (ediquin), electronics engineer and full-stack developer: graphic and brand design, church design work, video, websites and AI automation. La Paz, Bolivia."'),
-    ('<link rel="canonical" href="https://ediquin.github.io/ediquinweb/">', '<link rel="canonical" href="https://ediquin.github.io/ediquinweb/en/">'),
-    ('<meta property="og:title" content="Edilson Laura · ediquin — Ingeniero, diseño, video, web e IA">',
-     '<meta property="og:title" content="Edilson Laura · ediquin — Engineer, design, video, web and AI">'),
-    ('content="Ingeniero electrónico y desarrollador full-stack que diseña afiches, identidades, videos y sitios web, y automatiza con IA."',
-     'content="Electronics engineer and full-stack developer who designs posters, brand identities, videos and websites, and automates with AI."'),
-    ('<meta property="og:url" content="https://ediquin.github.io/ediquinweb/">', '<meta property="og:url" content="https://ediquin.github.io/ediquinweb/en/">\n<meta property="og:locale" content="en_US">'),
+    ('aria-label="Pausar los videos"', 'aria-label="Pause the videos"'),
+    # ---- 26/11/2026 (2): nombres técnicos, palabras clave y certificaciones (del CV del 26/11) ----
+    ('<ul class="etiquetas etiquetas-area revelar" aria-label="Habilidades"><li>Identidad visual</li><li>Branding</li><li>Diseño editorial</li><li>Impresión</li><li>Logos 3D</li><li>Diseño de indumentaria</li><li>Canva</li><li>Figma</li><li>Blender</li><li>Three.js</li></ul>',
+     '<ul class="etiquetas etiquetas-area revelar" aria-label="Skills"><li>Visual identity</li><li>Branding</li><li>Editorial design</li><li>Print</li><li>3D logos</li><li>Apparel design</li><li>Canva</li><li>Figma</li><li>Blender</li><li>Three.js</li></ul>'),
+    ('<ul class="etiquetas etiquetas-area revelar" aria-label="Habilidades"><li>Edición de video</li><li>Motion graphics</li><li>Animación 3D</li><li>Guion</li><li>Locución</li><li>Subtitulado</li><li>Corrección de color</li><li>DaVinci Resolve</li><li>Kdenlive</li><li>Remotion</li><li>Blender</li><li>FFmpeg</li></ul>',
+     '<ul class="etiquetas etiquetas-area revelar" aria-label="Skills"><li>Video editing</li><li>Motion graphics</li><li>3D animation</li><li>Scriptwriting</li><li>Voice-over</li><li>Subtitling</li><li>Color correction</li><li>DaVinci Resolve</li><li>Kdenlive</li><li>Remotion</li><li>Blender</li><li>FFmpeg</li></ul>'),
+    ('<ul class="etiquetas etiquetas-area revelar" aria-label="Habilidades"><li>Fotomontaje</li><li>Retoque</li><li>Corrección de color</li><li>Composición</li><li>Miniaturas</li><li>Exportación web (WebP)</li></ul>',
+     '<ul class="etiquetas etiquetas-area revelar" aria-label="Skills"><li>Photo compositing</li><li>Retouching</li><li>Color correction</li><li>Composition</li><li>Thumbnails</li><li>Web export (WebP)</li></ul>'),
+    ('<ul class="etiquetas etiquetas-area revelar" aria-label="Habilidades"><li>IA generativa</li><li>Prompt engineering</li><li>Generación de imagen</li><li>Higgsfield</li><li>ElevenLabs</li><li>Agentes de diseño</li></ul>',
+     '<ul class="etiquetas etiquetas-area revelar" aria-label="Skills"><li>Generative AI</li><li>Prompt engineering</li><li>Image generation</li><li>Higgsfield</li><li>ElevenLabs</li><li>Design agents</li></ul>'),
+    ('<ul class="etiquetas etiquetas-area revelar" aria-label="Habilidades"><li>Professional Services Engineer</li><li>QA y validación de migraciones</li><li>Atención a clientes en inglés</li><li>Docencia universitaria</li><li>Scrum</li></ul>',
+     '<ul class="etiquetas etiquetas-area revelar" aria-label="Skills"><li>Professional Services Engineer</li><li>QA and migration validation</li><li>English-speaking clients</li><li>University teaching</li><li>Scrum</li></ul>'),
+    ('<ul class="etiquetas etiquetas-area revelar" aria-label="Habilidades"><li>Front-end</li><li>Back-end</li><li>HTML · CSS · JavaScript</li><li>React</li><li>REST APIs</li><li>Python</li><li>PHP</li><li>Supabase</li><li>PostgreSQL</li><li>Accesibilidad WCAG</li><li>Rendimiento web</li><li>Sitios bilingües</li></ul>',
+     '<ul class="etiquetas etiquetas-area revelar" aria-label="Skills"><li>Front-end</li><li>Back-end</li><li>HTML · CSS · JavaScript</li><li>React</li><li>REST APIs</li><li>Python</li><li>PHP</li><li>Supabase</li><li>PostgreSQL</li><li>WCAG accessibility</li><li>Web performance</li><li>Bilingual websites</li></ul>'),
+    ('<ul class="etiquetas etiquetas-area revelar" aria-label="Habilidades"><li>Flutter</li><li>Android</li><li>Apps web instalables (PWA)</li><li>Supabase</li><li>Lector QR</li><li>Sin conexión</li><li>Pruebas en Android</li></ul>',
+     '<ul class="etiquetas etiquetas-area revelar" aria-label="Skills"><li>Flutter</li><li>Android</li><li>Installable web apps (PWA)</li><li>Supabase</li><li>QR reader</li><li>Offline</li><li>Android testing</li></ul>'),
+    ('<ul class="etiquetas etiquetas-area revelar" aria-label="Habilidades"><li>Agentes de IA</li><li>Flujos agénticos</li><li>LangGraph</li><li>CrewAI</li><li>n8n</li><li>Model Context Protocol</li><li>Claude Code</li><li>Codex</li><li>Evaluación de agentes</li></ul>',
+     '<ul class="etiquetas etiquetas-area revelar" aria-label="Skills"><li>AI agents</li><li>Agentic workflows</li><li>LangGraph</li><li>CrewAI</li><li>n8n</li><li>Model Context Protocol</li><li>Claude Code</li><li>Codex</li><li>Agent evaluation</li></ul>'),
+    ('<ul class="etiquetas etiquetas-area revelar" aria-label="Habilidades"><li>Linux</li><li>Virtualización</li><li>Caddy</li><li>Cloudflare Tunnel</li><li>Pruebas automáticas</li><li>Respaldos</li><li>Parches de seguridad</li><li>Git · GitHub</li><li>GCP · AWS · DigitalOcean</li></ul>',
+     '<ul class="etiquetas etiquetas-area revelar" aria-label="Skills"><li>Linux</li><li>Virtualization</li><li>Caddy</li><li>Cloudflare Tunnel</li><li>Automated testing</li><li>Backups</li><li>Security patching</li><li>Git · GitHub</li><li>GCP · AWS · DigitalOcean</li></ul>'),
+    ('<p class="heroe-rol">Ingeniero electrónico · Desarrollador full-stack · Automatización con IA · Diseño y video</p>',
+     '<p class="heroe-rol">Electronics engineer · Full-stack developer · AI automation · Design and video</p>'),
+    ('<li>Diseño gráfico y branding</li>',
+     '<li>Graphic design and branding</li>'),
+    ('<li>Edición de video y motion graphics</li>',
+     '<li>Video editing and motion graphics</li>'),
+    ('<li>Animación 3D (Blender, Three.js)</li>',
+     '<li>3D animation (Blender, Three.js)</li>'),
+    ('<li>IA generativa: imagen, voz y video</li>',
+     '<li>Generative AI: image, voice and video</li>'),
+    ('<li>Desarrollo full-stack y DevOps</li>',
+     '<li>Full-stack development and DevOps</li>'),
+    ('<li>Desarrollo móvil (Flutter)</li>',
+     '<li>Mobile development (Flutter)</li>'),
+    ('<li>IA agéntica: agentes, LangGraph y MCP</li>',
+     '<li>Agentic AI: agents, LangGraph and MCP</li>'),
+    ('<li>QA y automatización de pruebas</li>',
+     '<li>QA and test automation</li>'),
+    ('<p class="pagina-lead">Diseño gráfico, branding, edición de video y motion graphics: afiches, escudos y uniformes para la iglesia, identidades y logos 3D para marcas, y Shorts que comparten el Mensaje. Uso la IA generativa como parte del taller y termino cada pieza con criterio de diseño.</p>',
+     '<p class="pagina-lead">Graphic design, branding, video editing and motion graphics: posters, badges and uniforms for the church, identities and 3D logos for brands, and Shorts that share the Message. Generative AI is part of my workshop, and I finish every piece with a designer\'s judgement.</p>'),
+    ('<a href="#diseno">Diseño gráfico</a>',
+     '<a href="#diseno">Graphic design</a>'),
+    ('<a href="#video">Video y motion</a>',
+     '<a href="#video">Video and motion</a>'),
+    ('<a href="#foto">Fotografía</a>',
+     '<a href="#foto">Photography</a>'),
+    ('<a href="#ia-creativa">IA generativa</a>',
+     '<a href="#ia-creativa">Generative AI</a>'),
+    ('<a href="#apps">Desarrollo móvil</a>',
+     '<a href="#apps">Mobile development</a>'),
+    ('<a href="#certificaciones">Certificaciones</a>',
+     '<a href="#certificaciones">Certifications</a>'),
+    ('<p class="pre">Diseño gráfico y branding</p>',
+     '<p class="pre">Graphic design and branding</p>'),
+    ('<p class="pre">Edición de video y motion graphics</p>',
+     '<p class="pre">Video editing and motion graphics</p>'),
+    ('<p class="pre">Retoque y composición fotográfica</p>',
+     '<p class="pre">Photo retouching and compositing</p>'),
+    ('<p class="pre">IA generativa</p>',
+     '<p class="pre">Generative AI</p>'),
+    ('<h3>IA generativa</h3><ul><li>Generadores de imagen</li><li>Higgsfield</li><li>ElevenLabs</li><li>Skills propias para Claude Code</li></ul>',
+     '<h3>Generative AI</h3><ul><li>Image generators</li><li>Higgsfield</li><li>ElevenLabs</li><li>My own Claude Code skills</li></ul>'),
+    ('<p class="pre">Desarrollo full-stack</p>',
+     '<p class="pre">Full-stack development</p>'),
+    ('<p class="pre">Desarrollo móvil y apps</p>',
+     '<p class="pre">Mobile development and apps</p>'),
+    ('<p class="pre">DevOps e infraestructura</p>',
+     '<p class="pre">DevOps and infrastructure</p>'),
+    ('<h3>Web y móvil</h3>',
+     '<h3>Web and mobile</h3>'),
+    ('<h3>QA y DevOps</h3>',
+     '<h3>QA and DevOps</h3>'),
+    ('<p class="pre">Certificaciones y formación</p>',
+     '<p class="pre">Certifications and training</p>'),
+    ('<h2 id="cert-t">Aprender es parte <em>del trabajo.</em></h2>',
+     '<h2 id="cert-t">Learning is part <em>of the job.</em></h2>'),
+    ('<p class="area-intro">Título de ingeniero, un diplomado y cursos al día en IA agéntica, nube y desarrollo. Los nombres de los cursos van como los emite cada institución.</p>',
+     '<p class="area-intro">An engineering degree, a postgraduate diploma and up-to-date courses in agentic AI, cloud and development. Course names appear as each institution issues them.</p>'),
+    ('<h3>Ingeniería Electrónica</h3><p>Mención en Sistemas de Computación · 2016–2022</p>',
+     '<h3>Electronic Engineering</h3><p>Major in Computer Systems · 2016–2022</p>'),
+    ('<h3>Diplomado en Educación Superior Basada en Competencias</h3>',
+     '<h3>Diploma in Competency-Based Higher Education</h3>'),
+    ('<p class="cert-quien">CodeRoad · Reconocimiento</p>',
+     '<p class="cert-quien">CodeRoad · Award</p>'),
+    ('<p>Septiembre de 2025, por la opinión de los clientes</p>',
+     '<p>September 2025, for positive customer feedback</p>'),
+    ('<li>Hackatones de IA agéntica <span>2025 y 2026</span></li>',
+     '<li>Agentic AI hackathons <span>2025 and 2026</span></li>'),
+    ('<li>Pensamiento computacional con Python <span>2019</span></li>',
+     '<li>Computational thinking with Python <span>2019</span></li>'),
+    ('<li>Programación orientada a objetos con Python <span>2020</span></li>',
+     '<li>Object-oriented programming with Python <span>2020</span></li>'),
+    ('<li>Curso de PHP <span>2020</span></li>',
+     '<li>PHP course <span>2020</span></li>'),
+    ('<li>Inglés práctico <span>2020</span></li>',
+     '<li>Practical English <span>2020</span></li>'),
+    ('<p class="cert-quien">Idiomas</p>',
+     '<p class="cert-quien">Languages</p>'),
+    ('<li>Español <span>nativo</span></li><li>Inglés <span>profesional</span></li>',
+     '<li>Spanish <span>native</span></li><li>English <span>professional working proficiency</span></li>'),
+    # ---- 26/11/2026: tres páginas (inicio, diseno/, software/) ----
+    ('Edilson Laura · ediquin — Diseño, video, software e IA', 'Edilson Laura · ediquin — Design, video, software and AI'),
+    ('Diseño y video · Edilson Laura (ediquin)', 'Design and video · Edilson Laura (ediquin)'),
+    ('Software e IA agéntica · Edilson Laura (ediquin)', 'Software and agentic AI · Edilson Laura (ediquin)'),
+    ('content="Portafolio de Edilson Byron Laura Mercado (ediquin), ingeniero electrónico y desarrollador full-stack. Dos caminos: diseño y video para la iglesia y marcas, y software, apps e IA agéntica. La Paz, Bolivia."',
+     'content="Portfolio of Edilson Byron Laura Mercado (ediquin), electronics engineer and full-stack developer. Two paths: design and video for churches and brands, and software, apps and agentic AI. La Paz, Bolivia."'),
+    ('content="Ingeniero electrónico y desarrollador full-stack: diseño y video por un lado, software, apps y agentes de IA por el otro."',
+     'content="Electronics engineer and full-stack developer: design and video on one side, software, apps and AI agents on the other."'),
+    ('content="Diseño gráfico y video de Edilson Laura (ediquin): afiches, escudos y uniformes para la iglesia, identidad y logos 3D, Shorts, animación y videos hechos con código. La Paz, Bolivia."',
+     'content="Graphic design and video by Edilson Laura (ediquin): church posters, badges and uniforms, brand identity and 3D logos, Shorts, animation and videos made with code. La Paz, Bolivia."'),
+    ('content="Afiches y piezas para la iglesia, identidad y logos 3D, Shorts y videos hechos con código."',
+     'content="Church posters and pieces, brand identity and 3D logos, Shorts and videos made with code."'),
+    ('content="Software de Edilson Laura (ediquin), ingeniero electrónico y desarrollador full-stack: sitios web rápidos y accesibles, apps con QR para el Ministerio Joven, skills y agentes de IA de código abierto y servidor propio. Experiencia en CodeRoad."',
+     'content="Software by Edilson Laura (ediquin), electronics engineer and full-stack developer: fast, accessible websites, QR apps for Adventist Youth Ministries, open-source AI skills and agents, and a self-run server. Experience at CodeRoad."'),
+    ('content="Sitios web, apps con QR, skills y agentes de IA de código abierto, y servidor propio. Experiencia en CodeRoad con Cox Automotive."',
+     'content="Websites, QR apps, open-source AI skills and agents, and a self-run server. Experience at CodeRoad with Cox Automotive."'),
+    ('<nav class="menu" aria-label="Caminos">', '<nav class="menu" aria-label="Paths">'),
+    ('</span>Diseño y video</a>', '</span>Design and video</a>'),
+    ('</span>Software e IA</a>', '</span>Software and AI</a>'),
+    ('#trayectoria">Trayectoria</a>', '#trayectoria">Experience</a>'),
+    ('nativzar-mj/">Nativzar MJ</a>', 'nativzar-mj/" hreflang="es">Nativzar MJ</a>'),
+    ('nativzar-mj/privacidad.html">Privacidad</a>', 'nativzar-mj/privacidad.html" hreflang="es">Privacy (Spanish)</a>'),
+    ('nativzar-mj/terminos.html">Términos</a>', 'nativzar-mj/terminos.html" hreflang="es">Terms (Spanish)</a>'),
+
+    # inicio: héroe y caminos
+    ('<dt>Apps y herramientas</dt>', '<dt>Apps and tools</dt>'),
+    ('<figcaption>Agente de IA</figcaption>', '<figcaption>AI agent</figcaption>'),
+    ('emblema: C1\npañoleta: GM\n<span class="ok">✓ correcto</span>', 'emblem: C1\nscarf: GM\n<span class="ok">✓ correct</span>'),
+    ('DISEÑO · VIDEO · SOFTWARE · IA · ', 'DESIGN · VIDEO · SOFTWARE · AI · '),
+    ('<span>Afiches</span><span>Identidad de marca</span><span>Logos 3D</span><span>Shorts</span><span>Animación</span><span>Sitios web</span><span>Apps</span><span>Agentes de IA</span><span>Servidor propio</span><span>Figma · aprendiendo</span>',
+     '<span>Posters</span><span>Brand identity</span><span>3D logos</span><span>Shorts</span><span>Animation</span><span>Websites</span><span>Apps</span><span>AI agents</span><span>Own server</span><span>Figma · learning</span>'),
+    ('<p class="pre">Mi trabajo</p>', '<p class="pre">My work</p>'),
+    ('<h2 id="caminos-t">Dos caminos. <em>Elige el tuyo.</em></h2>', '<h2 id="caminos-t">Two paths. <em>Pick yours.</em></h2>'),
+    ('<p>El diseño y la ingeniería se apoyan entre sí, pero cada uno tiene su propia página con proyectos reales. Entra por el que te interesa.</p>',
+     '<p>Design and engineering support each other, but each one has its own page with real projects. Go in through the one you care about.</p>'),
+    ('</span>Para iglesias, marcas y redes</p>', '</span>For churches, brands and social media</p>'),
+    ('href="diseno/">Diseño y video</a>', 'href="diseno/">Design and video</a>'),
+    ('Ver diseño y video <svg', 'See design and video <svg'),
+    ('<span class="ok">✓</span> 168 pruebas · 0 fallas', '<span class="ok">✓</span> 168 tests · 0 failures'),
+    ('<span class="ok">✓</span> emblemas correctos', '<span class="ok">✓</span> correct emblems'),
+    ('</span>Para equipos y proyectos técnicos</p>', '</span>For teams and technical projects</p>'),
+    ('href="software/">Software e IA agéntica</a>', 'href="software/">Software and agentic AI</a>'),
+    ('Ver software e IA <svg', 'See software and AI <svg'),
+    ('<b>¿Algo en los dos caminos?</b> <span>AI_design_7thday es software que diseña: skills de IA que hacen afiches del Ministerio Joven con los emblemas correctos.</span> <a class="enlace" href="software/#ia">Ver el proyecto</a>',
+     '<b>Something on both paths?</b> <span>AI_design_7thday is software that designs: AI skills that make Youth Ministries posters with the correct emblems.</span> <a class="enlace" href="software/#ia">See the project</a>'),
+    ('<p>Afiches, un video, un sitio web, una app o un flujo con agentes de IA. Cuéntame qué necesitas y te respondo con una propuesta clara.</p>',
+     '<p>Posters, a video, a website, an app or an AI agent workflow. Tell me what you need and I\'ll reply with a clear proposal. I work in Spanish and English.</p>'),
+
+    # cabeza de las páginas
+    ('<nav class="migas" aria-label="Ruta"><a href="../">Inicio</a>', '<nav class="migas" aria-label="Breadcrumb"><a href="../">Home</a>'),
+    ('<span aria-current="page">Diseño y video</span>', '<span aria-current="page">Design and video</span>'),
+    ('<span aria-current="page">Software e IA</span>', '<span aria-current="page">Software and AI</span>'),
+    ('<p class="pre">Camino 01</p>', '<p class="pre">Path 01</p>'),
+    ('<p class="pre">Camino 02</p>', '<p class="pre">Path 02</p>'),
+    ('<nav class="subnav" aria-label="En esta página">', '<nav class="subnav" aria-label="On this page">'),
+    ('<a href="#herramientas">Herramientas</a>', '<a href="#herramientas">Tools</a>'),
+    ('<a href="#experiencia">Experiencia</a>', '<a href="#experiencia">Experience</a>'),
+    ('<a href="#ia">IA agéntica</a>', '<a href="#ia">Agentic AI</a>'),
+    ('>¿Buscas el lado técnico? Ver software e IA</a>', '>Looking for the technical side? See software and AI</a>'),
+    ('>¿Buscas diseño? Ver diseño y video</a>', '>Looking for design? See design and video</a>'),
+
+    # diseno/
+    ('<h1 id="pag-t">Diseño y video <em>con propósito.</em></h1>', '<h1 id="pag-t">Design and video <em>with purpose.</em></h1>'),
+    ('<h3>Videos hechos con código</h3>', '<h3>Videos made with code</h3>'),
+    ('<p>En Kauxte ofrezco diez estilos de video que armo por código, con Remotion y Three.js, y con agentes de IA: recortes editoriales, capturas de apps en 3D, mundos isométricos, pizarrón a mano y más.</p>',
+     '<p>At Kauxte I offer ten video styles that I build in code, with Remotion and Three.js, and with AI agents: editorial cut-outs, app screens in 3D, isometric worlds, hand-drawn whiteboards and more.</p>'),
+    ('>Ver los diez estilos en vivo <svg', '>See all ten styles live <svg'),
+    ('alt="Grabado antiguo de dos médicos en un hospital, recortado en blanco y negro"', 'alt="Old engraving of two doctors in a hospital, cut out in black and white"'),
+    ('alt="Menú de la salteñería Repulgue en computadora y celular, presentado en 3D"', 'alt="The Repulgue bakery menu on a computer and a phone, shown in 3D"'),
+    ('alt="Isla isométrica en 3D con una montaña nevada, un río y un bosque"', 'alt="Isometric 3D island with a snowy mountain, a river and a forest"'),
+    ('alt="Dibujo a mano de una tienda, un celular con WhatsApp y un gráfico que sube"', 'alt="Hand drawing of a shop, a phone with WhatsApp and a rising chart"'),
+    ('alt="Dos personajes de bloques en 3D conversando"', 'alt="Two 3D block characters talking"'),
+    ('alt="Vaquita ilustrada con flores y un globo de corazón para una invitación de baby shower"', 'alt="Illustrated little cow with flowers and a heart balloon for a baby shower invitation"'),
+    ('<span>Producto en vivo</span>', '<span>Live product</span>'),
+    ('<span>Mundo 3D isométrico</span>', '<span>Isometric 3D world</span>'),
+    ('<span>Pizarrón vivo</span>', '<span>Live whiteboard</span>'),
+    ('<span>Mundo de bloques</span>', '<span>Block world</span>'),
+    ('<span>Ilustración animada</span>', '<span>Animated illustration</span>'),
+    ('<h3>Afiches con mi propio agente</h3><p>Creé <b>AI_design_7thday</b>, skills que le enseñan a la IA qué emblema, pañoleta y colores van en cada afiche de Conquistadores, Aventureros y Guías Mayores. <a class="enlace" href="../software/#ia">Cómo está hecho</a></p>',
+     '<h3>Posters with my own agent</h3><p>I built <b>AI_design_7thday</b>, skills that teach AI which emblem, scarf and colours belong on each Pathfinder, Adventurer and Master Guide poster. <a class="enlace" href="../software/#ia">How it\'s built</a></p>'),
+    ('<h2 id="herr-t">Con qué <em>diseño.</em></h2>', '<h2 id="herr-t">What I <em>design with.</em></h2>'),
+    ('<h2 id="contacto-t">¿Un afiche, un logo o un video? <em>Hagámoslo bien.</em></h2>', '<h2 id="contacto-t">A poster, a logo or a video? <em>Let\'s do it right.</em></h2>'),
+    ('<p>Piezas para tu iglesia, tu club o tu marca, y videos para redes. Cuéntame qué necesitas y te respondo con una propuesta clara.</p>',
+     '<p>Pieces for your church, your club or your brand, and videos for social media. Tell me what you need and I\'ll reply with a clear proposal. I work in Spanish and English.</p>'),
+    ('<p class="contacto-otro">¿También necesitas un sitio, una app o un agente? <a class="enlace" href="../software/">Ver software e IA</a></p>',
+     '<p class="contacto-otro">Also need a website, an app or an agent? <a class="enlace" href="../software/">See software and AI</a></p>'),
+
+    # software/
+    ('<h1 id="pag-t">Software e IA agéntica, <em>probados de verdad.</em></h1>', '<h1 id="pag-t">Software and agentic AI, <em>properly tested.</em></h1>'),
+    ('<p class="pagina-lead">Ingeniero electrónico (UMSA) y desarrollador full-stack. Trabajé en CodeRoad con clientes como Cox Automotive, y hoy construyo sitios, apps y agentes de IA para mi estudio Kauxte y para el Ministerio Joven.</p>',
+     '<p class="pagina-lead">Electronics engineer (UMSA) and full-stack developer. I worked at CodeRoad with clients such as Cox Automotive, and today I build websites, apps and AI agents for my studio, Kauxte, and for Adventist Youth Ministries.</p>'),
+    ('<p class="pre">Experiencia</p>', '<p class="pre">Experience</p>'),
+    ('<h2 id="exp-t">Del circuito <em>al cliente.</em></h2>', '<h2 id="exp-t">From the circuit <em>to the client.</em></h2>'),
+    ('<p class="area-intro">Vengo de la ingeniería electrónica: medir, probar y documentar. Eso mismo llevé a CodeRoad, al aula y a mis propios proyectos.</p>',
+     '<p class="area-intro">I come from electronics engineering: measure, test and document. I brought the same habits to CodeRoad, to the classroom and to my own projects.</p>'),
+    ('<p>Sitios y experiencias digitales automotrices para clientes como <b>Cox Automotive</b>: implementación, QA y validación de migraciones, en inglés y en contacto directo con el cliente.</p>',
+     '<p>Automotive websites and digital experiences for clients such as <b>Cox Automotive</b>: implementation, QA and migration validation, in English and working directly with the client.</p>'),
+    ('TechStar of the Month · Customer Success Legend · sept. 2025', 'TechStar of the Month · Customer Success Legend · Sept. 2025'),
+    ('<h3>Docente universitario · UAB</h3><p>Arquitectura de Computadoras, Sistemas Digitales I y II y Bases de Datos I, con materiales por competencias e IA en clase.</p>',
+     '<h3>University lecturer · UAB</h3><p>Computer Architecture, Digital Systems I and II and Database Systems I, with competency-based materials and AI in class.</p>'),
+    ('<h3>Backend de «PASY Mascotas»</h3><p>App web de código abierto para adoptar mascotas: base de datos, backend en PHP y MySQL y despliegue en la nube. <a class="enlace" href="https://github.com/ediquin/pasy" target="_blank" rel="noopener">Ver el código</a></p></li>',
+     '<h3>Backend for «PASY Mascotas»</h3><p>An open-source web app for pet adoption: database, PHP and MySQL backend and cloud deployment. <a class="enlace" href="https://github.com/ediquin/pasy" target="_blank" rel="noopener">See the code</a></p></li>'),
+    ('<h3>Proyecto de grado · UMSA</h3><p>Sistema de asistencia biométrico con IoT y su web de reportes para el Instituto de Electrónica Aplicada.</p>',
+     '<h3>Degree project · UMSA</h3><p>A biometric IoT attendance system and its reporting website for the Institute of Applied Electronics.</p>'),
+    ('>Ver la trayectoria completa</a>', '>See my full experience</a>'),
+    ('<h2 id="web-t">Rápidos, accesibles <em>y probados.</em></h2>', '<h2 id="web-t">Fast, accessible <em>and tested.</em></h2>'),
+    ('<p class="area-intro">Escribo HTML, CSS y JavaScript propios, sin plantillas pesadas, en español e inglés. Los publico en mi propio servidor detrás de Cloudflare y los reviso con pruebas automáticas de accesibilidad y rendimiento antes de entregarlos.</p>',
+     '<p class="area-intro">I write my own HTML, CSS and JavaScript, without heavy templates, in Spanish and English. I publish them on my own server behind Cloudflare and check them with automated accessibility and performance tests before delivery.</p>'),
+    ('<h2 id="apps-t">Software que ya usan <em>los clubes.</em></h2>', '<h2 id="apps-t">Software the clubs <em>already use.</em></h2>'),
+    ('<p class="area-intro">Herramientas para el Ministerio Joven que nacieron de problemas reales: puntuar un camporí sin señal, validar un certificado o revisar actas antes de registrarlas.</p>',
+     '<p class="area-intro">Tools for Adventist Youth Ministries that grew out of real problems: scoring a camporee with no signal, validating a certificate or checking records before they are filed.</p>'),
+    ('<p class="estado">Android · prueba abierta en revisión</p>', '<p class="estado">Android · open testing in review</p>'),
+    ('<p>App para clubes de Conquistadores y Aventureros: asistencia, clases, devocionales, camporís con QR y actas.</p>',
+     '<p>An app for Pathfinder and Adventurer clubs: attendance, classes, devotionals, QR camporees and records.</p>'),
+    ('<li>Lector QR</li>', '<li>QR reader</li>'),
+    ('>Ver la app</a>', '>See the app</a>'),
+    ('<p class="estado">Usada en el Camporí de Aventureros</p>', '<p class="estado">Used at the Adventurer Camporee</p>'),
+    ('<p>App web instalable con stickers QR únicos para puntuar a los clubes desde el celular, incluso sin señal.</p>',
+     '<p>An installable web app with unique QR stickers to score clubs from a phone, even with no signal.</p>'),
+    ('<li>App web instalable</li>', '<li>Installable web app</li>'),
+    ('<li>Sin conexión</li>', '<li>Offline</li>'),
+    ('>Ver el código <svg', '>See the code <svg'),
+    ('<p class="estado">En uso en cursos de directivas</p>', '<p class="estado">In use in leadership courses</p>'),
+    ('<h3>Certificados con QR</h3>', '<h3>QR certificates</h3>'),
+    ('<p>Genera certificados por lotes, cada uno con un QR que lleva a una página pública para comprobar que es auténtico.</p>',
+     '<p>Generates certificates in batches, each with a QR code that leads to a public page to check it is authentic.</p>'),
+    ('>Verificar un certificado <svg', '>Verify a certificate <svg'),
+    ('<p class="estado">Portal web activo</p>', '<p class="estado">Live web portal</p>'),
+    ('<h3>Actas con QR</h3>', '<h3>QR records</h3>'),
+    ('<p>Consulta pública de integridad y aprobación versionada de actas de especialidades y clases por cinco cargos.</p>',
+     '<p>Public integrity checks and versioned approval of honor and class records by five officers.</p>'),
+    ('<li>Versiones</li>', '<li>Versioning</li>'),
+    ('>Abrir el portal <svg', '>Open the portal <svg'),
+    ('<p class="estado">Disponible · gratis</p>', '<p class="estado">Available · free</p>'),
+    ('<h3>Pósters en PDF</h3>', '<h3>PDF posters</h3>'),
+    ('<p>Convierte una imagen en un póster grande repartido en hojas carta, oficio o A4, con marcas de corte. Todo pasa en el navegador: la imagen no se sube.</p>',
+     '<p>Turns an image into a large poster split across letter, legal or A4 sheets, with crop marks. Everything happens in the browser: the image is never uploaded.</p>'),
+    ('<li>Sin servidor</li>', '<li>No server</li>'),
+    ('>Abrir el impresor <svg', '>Open the printer <svg'),
+    ('<p class="estado">En desarrollo</p>', '<p class="estado">In development</p>'),
+    ('<h3>Automatizador SGC</h3>', '<h3>SGC automation</h3>'),
+    ('<p>Prepara y revisa actas de especialidades, clases e Insignia de Excelencia antes de registrarlas en el SGC, con pruebas automáticas.</p>',
+     '<p>Prepares and checks honor, class and Excellence Award records before they are filed in the SGC, with automated tests.</p>'),
+    ('<li>Importador</li>', '<li>Importer</li>'),
+    ('<li>Pruebas automáticas</li>', '<li>Automated tests</li>'),
+    ('<p class="apps-mas">También: <a class="enlace" href="https://ediquin.github.io/curson_virtual_sgc/" target="_blank" rel="noopener">Curso virtual SGC</a> para capacitar líderes, y acceso web para <a class="enlace" href="https://nativzar.duckdns.org/jurado/" target="_blank" rel="noopener">jurados y evaluadores</a> de eventos.</p>',
+     '<p class="apps-mas">Also: an <a class="enlace" href="https://ediquin.github.io/curson_virtual_sgc/" target="_blank" rel="noopener">SGC online course</a> to train leaders, and web access for event <a class="enlace" href="https://nativzar.duckdns.org/jurado/" target="_blank" rel="noopener">judges and evaluators</a>.</p>'),
+    ('<p class="pre">IA agéntica</p>', '<p class="pre">Agentic AI</p>'),
+    ('<h2 id="ia-t">Agentes que saben <em>lo que no deben inventar.</em></h2>', '<h2 id="ia-t">Agents that know <em>what not to make up.</em></h2>'),
+    ('<p class="area-intro">Trabajo a diario con agentes de IA, y escribo las reglas que los hacen confiables: qué consultar antes de actuar, qué verificar al terminar y cuándo detenerse.</p>',
+     '<p class="area-intro">I work with AI agents every day, and I write the rules that make them reliable: what to check before acting, what to verify when done and when to stop.</p>'),
+    ('<span class="c"># 1. Descarga la skill</span>', '<span class="c"># 1. Download the skill</span>'),
+    ('<span class="c"># 2. Pide a tu asistente de IA:</span>\n«Haz un afiche para la investidura\n de Conquistadores del club Central,\n sábado 14 de marzo, con el emblema C1.»',
+     '<span class="c"># 2. Ask your AI assistant:</span>\n«Make a poster for the Pathfinder\n investiture of club Central,\n Saturday 14 March, with emblem C1.»'),
+    ('<span class="ok">✓</span> emblema C1 · pañoleta correcta · 300 ppp', '<span class="ok">✓</span> emblem C1 · correct scarf · 300 dpi'),
+    ('<p class="pre">Proyecto propio · Código abierto (MIT)</p>', '<p class="pre">My own project · Open source (MIT)</p>'),
+    ('<p>Skills para Claude Code y Codex que diseñan afiches, cartillas y certificados del Ministerio Joven. Le enseñan al asistente qué emblema va en cada caso, cómo se ve cada pañoleta y qué no debe inventar.</p>',
+     '<p>Skills for Claude Code and Codex that design Youth Ministries posters, cards and certificates. They teach the assistant which emblem goes where, what each scarf looks like and what it must not make up.</p>'),
+    ('<li><b>afiches-iasd</b>: afiches y moldes de certificados en alta resolución</li>', '<li><b>afiches-iasd</b>: high-resolution posters and certificate templates</li>'),
+    ('<li><b>cartillas-iasd</b>: cartillas en PDF con espacios reales para stickers QR</li>', '<li><b>cartillas-iasd</b>: PDF cards with real spaces for QR stickers</li>'),
+    ('<li><b>reparar-simbolos-iasd</b>: corrige solo el emblema que salió mal</li>', '<li><b>reparar-simbolos-iasd</b>: fixes only the emblem that came out wrong</li>'),
+    ('<p>Por dentro hay una ontología de símbolos y reglas (qué emblema va con cada club y clase) y un catálogo de referencias que el agente consulta antes de dibujar.</p>',
+     '<p>Inside there is an ontology of symbols and rules (which emblem goes with each club and class) and a reference catalogue the agent checks before drawing.</p>'),
+    ('>Ver en GitHub <svg', '>See it on GitHub <svg'),
+    ('<h3>Desarrollo con agentes</h3><p>Construyo con <b>Claude Code</b>, Codex y Cursor: escribo skills propias, reviso lo que hacen con pruebas automáticas y coordino varios agentes en paralelo.</p>',
+     '<h3>Building with agents</h3><p>I build with <b>Claude Code</b>, Codex and Cursor: I write my own skills, check their work with automated tests and coordinate several agents in parallel.</p>'),
+    ('<h3>Flujos y automatización</h3><p>Agentes con <b>LangGraph</b>, CrewAI y n8n. Cursos de Anthropic (Model Context Protocol, Claude Code in Action) y hackatones de IA agéntica.</p>',
+     '<h3>Workflows and automation</h3><p>Agents with <b>LangGraph</b>, CrewAI and n8n. Anthropic courses (Model Context Protocol, Claude Code in Action) and agentic AI hackathons.</p>'),
+    ('<h3>Video por código</h3><p>Skills que arman videos con <b>Remotion</b> y Three.js. De ahí salen los diez estilos de video de Kauxte. <a class="enlace" href="../diseno/#video">Verlos</a></p>',
+     '<h3>Video in code</h3><p>Skills that build videos with <b>Remotion</b> and Three.js. That is where Kauxte\'s ten video styles come from. <a class="enlace" href="../diseno/#video">See them</a></p>'),
+    ('<h2 id="srv-t">Mi propio servidor, <em>cuidado como producción.</em></h2>', '<h2 id="srv-t">My own server, <em>run like production.</em></h2>'),
+    ('<p class="area-intro">Mis sitios y demos corren en un servidor Linux que administro yo, con Cloudflare delante. Lo trato como un entorno de producción.</p>',
+     '<p class="area-intro">My websites and demos run on a Linux server I manage myself, with Cloudflare in front. I treat it as a production environment.</p>'),
+    ('<h3>Aislado</h3><p>Cada servicio público vive en su propia máquina virtual, separado de los datos privados.</p>',
+     '<h3>Isolated</h3><p>Each public service lives in its own virtual machine, away from private data.</p>'),
+    ('<h3>Con versiones</h3><p>Cada publicación tiene su versión y se puede revertir en un paso.</p>',
+     '<h3>Versioned</h3><p>Every release has its own version and can be rolled back in one step.</p>'),
+    ('<h3>Probado</h3><p>Antes de publicar, más de 160 pruebas revisan encabezados de seguridad, enlaces y rendimiento.</p>',
+     '<h3>Tested</h3><p>Before publishing, more than 160 tests check security headers, links and performance.</p>'),
+    ('<h3>Respaldado</h3><p>Respaldos con restauración comprobada y parches de seguridad al día.</p>',
+     '<h3>Backed up</h3><p>Backups with tested restores, and security patches kept up to date.</p>'),
+    ('<h2 id="herr-t">Con qué <em>construyo.</em></h2>', '<h2 id="herr-t">What I <em>build with.</em></h2>'),
+    ('<h3>Datos y nube</h3>', '<h3>Data and cloud</h3>'),
+    ('<h3>IA y agentes</h3>', '<h3>AI and agents</h3>'),
+    ('<h2 id="contacto-t">¿Un sitio, una app o un agente? <em>Construyámoslo bien.</em></h2>', '<h2 id="contacto-t">A website, an app or an agent? <em>Let\'s build it right.</em></h2>'),
+    ('<p>Cuéntame el problema que quieres resolver y te respondo con una propuesta clara: alcance, tecnología y plazos. Trabajo en español e inglés.</p>',
+     '<p>Tell me the problem you want to solve and I\'ll reply with a clear proposal: scope, technology and timeline. I work in Spanish and English.</p>'),
+    ('<p class="contacto-otro">¿También necesitas afiches o video? <a class="enlace" href="../diseno/">Ver diseño y video</a></p>',
+     '<p class="contacto-otro">Also need posters or video? <a class="enlace" href="../diseno/">See design and video</a></p>'),
     ('<a class="saltar" href="#contenido">Saltar al contenido</a>', '<a class="saltar" href="#contenido">Skip to content</a>'),
-    ('<nav class="menu" aria-label="Secciones">', '<nav class="menu" aria-label="Sections">'),
-    ('<span aria-hidden="true">01</span>Diseño</a>', '<span aria-hidden="true">01</span>Design</a>'),
-    ('<span aria-hidden="true">03</span>Foto</a>', '<span aria-hidden="true">03</span>Photo</a>'),
-    ('<span aria-hidden="true">05</span>IA</a>', '<span aria-hidden="true">05</span>AI</a>'),
-    ('<a href="#trayectoria">Trayectoria</a>', '<a href="#trayectoria">Experience</a>'),
-    ('<a class="idioma" href="../en/" hreflang="en" lang="en"><span class="sr-only">Read in English · </span>EN</a>',
-     '<a class="idioma" href="../" hreflang="es" lang="es"><span class="sr-only">Leer en español · </span>ES</a>'),
     ('href="#contacto">Escríbeme</a>', 'href="#contacto">Contact me</a>'),
 
     # héroe
-    ('<p class="heroe-rol">Ingeniero electrónico · Desarrollador full-stack · Automatización con IA</p>',
-     '<p class="heroe-rol">Electronics engineer · Full-stack developer · AI automation</p>'),
     ('<p class="heroe-lead">Hice sitios para clientes como <strong>Cox Automotive</strong> en CodeRoad y enseñé en la universidad. Hoy uno la ingeniería con el diseño: <strong>afiches, identidades, videos, sitios web y flujos con agentes de IA</strong>, cuidando que cada pieza se vea bien y funcione.</p>',
      '<p class="heroe-lead">I built websites for clients such as <strong>Cox Automotive</strong> at CodeRoad and taught at university. Today I bring engineering and design together: <strong>posters, brand identities, videos, websites and AI agent workflows</strong>, making sure every piece looks good and works.</p>'),
     ('>Ver mi trabajo <svg', '>See my work <svg'),
@@ -52,31 +336,11 @@ PARES = [
     ('alt="Edilson Laura, retrato recortado sin fondo"', 'alt="Edilson Laura, cut-out portrait"'),
     ('<figcaption>Afiche</figcaption>', '<figcaption>Poster</figcaption>'),
     ('alt="Miniatura del Short «Dijeron que Salomón se equivocó»"', 'alt="Thumbnail of the Short «They said Solomon was wrong»"'),
-    ('alt="Logo 3D de Kauxte"', 'alt="Kauxte 3D logo"'),
-    ('<figcaption>Logo 3D</figcaption>', '<figcaption>3D logo</figcaption>'),
     ('alt="Portada del sitio kauxte.com"', 'alt="Home page of kauxte.com"'),
-    ('DISEÑO · VIDEO · FOTO · WEB · IA · ', 'DESIGN · VIDEO · PHOTO · WEB · AI · '),
-    ('<span>Afiches</span><span>Identidad de marca</span><span>Logos 3D</span><span>Shorts</span><span>Animación</span><span>Escudos y parches</span><span>Uniformes</span><span>Sitios web</span><span>IA generativa</span><span>Figma · aprendiendo</span>',
-     '<span>Posters</span><span>Brand identity</span><span>3D logos</span><span>Shorts</span><span>Animation</span><span>Badges and patches</span><span>Uniforms</span><span>Websites</span><span>Generative AI</span><span>Figma · learning</span>'),
 
     # índice
-    ('<p class="pre">Índice</p>', '<p class="pre">Index</p>'),
-    ('<h2 id="indice-t">Lo que hago, <em>en orden.</em></h2>', '<h2 id="indice-t">What I do, <em>in order.</em></h2>'),
-    ('<p>Cinco áreas que se apoyan entre sí: el diseño da la base, y el video, la foto, la web y la IA la llevan a cada pantalla.</p>',
-     '<p>Five areas that support each other: design is the foundation, and video, photo, web and AI take it to every screen.</p>'),
-    ('<span class="ix-t">Diseño gráfico y de marca</span><span class="ix-d">Afiches, identidad, logos 3D y piezas para la iglesia</span>',
-     '<span class="ix-t">Graphic and brand design</span><span class="ix-d">Posters, identity, 3D logos and church design</span>'),
-    ('<span class="ix-t">Video y animación</span><span class="ix-d">Shorts, edición, motion y 3D</span>',
-     '<span class="ix-t">Video and animation</span><span class="ix-d">Shorts, editing, motion and 3D</span>'),
-    ('<span class="ix-t">Edición fotográfica</span><span class="ix-d">Fotos integradas al diseño, fotomontaje y miniaturas</span>',
-     '<span class="ix-t">Photo editing</span><span class="ix-d">Photos built into designs, composites and thumbnails</span>'),
-    ('<span class="ix-t">Sitios web y apps</span><span class="ix-d">Rápidos, accesibles y bilingües</span>',
-     '<span class="ix-t">Websites and apps</span><span class="ix-d">Fast, accessible and bilingual</span>'),
-    ('<span class="ix-t">IA aplicada</span><span class="ix-d">Imagen, voz, video y agentes</span>',
-     '<span class="ix-t">Applied AI</span><span class="ix-d">Image, voice, video and agents</span>'),
 
     # 01 diseño
-    ('<p class="pre">Diseño gráfico y de marca</p>', '<p class="pre">Graphic and brand design</p>'),
     ('<h2 id="diseno-t">Piezas que se <em>entienden</em> de un vistazo.</h2>', '<h2 id="diseno-t">Pieces you <em>understand</em> at a glance.</h2>'),
     ('<p class="area-intro">Jerarquía clara, contraste que se lee en un celular y una paleta que se repite en todo: así diseño afiches para eventos, identidades completas y logos que también viven en 3D.</p>',
      '<p class="area-intro">Clear hierarchy, contrast that reads on a phone and one palette used everywhere: that is how I design event posters, complete identities and logos that also live in 3D.</p>'),
@@ -150,7 +414,6 @@ PARES = [
     ('aria-label="Diseños de indumentaria"', 'aria-label="Apparel designs"'),
 
     # 02 video
-    ('<p class="pre">Video y animación</p>', '<p class="pre">Video and animation</p>'),
     ('<h2 id="video-t">Compartir el Mensaje, <em>un video a la vez.</em></h2>', '<h2 id="video-t">Sharing the Message, <em>one video at a time.</em></h2>'),
     ('<p class="area-intro">Escribo el guion, grabo o genero la voz, edito, animo y subtitulo. La serie <b>«Escrito antes de ser descubierto»</b> del canal Nativzar ya tiene siete capítulos.</p>',
      '<p class="area-intro">I write the script, record or generate the voice, edit, animate and add subtitles. The Nativzar channel series <b>«Written before it was discovered»</b> already has seven episodes (in Spanish).</p>'),
@@ -185,7 +448,6 @@ PARES = [
     ('>Ver el capítulo largo (4:03) <svg', '>Watch the long episode (4:03) <svg'),
 
     # 03 foto
-    ('<p class="pre">Edición fotográfica</p>', '<p class="pre">Photo editing</p>'),
     ('<h2 id="foto-t">La foto correcta, <em>bien tratada.</em></h2>', '<h2 id="foto-t">The right photo, <em>well treated.</em></h2>'),
     ('<p class="area-intro">No solo recorto: integro personas y objetos reales a un diseño con la misma luz, color y sombra, y dejo cada pieza lista para imprimir, para miniatura o para una web liviana.</p>',
      '<p class="area-intro">I don\'t just cut photos out: I build real people and objects into a design with matching light, colour and shadow, and prepare each piece for print, for a thumbnail or for a lightweight website.</p>'),
@@ -208,10 +470,6 @@ PARES = [
     ('<li>Exportación para web: WebP en varios tamaños, livianas y nítidas</li>', '<li>Web export: WebP in several sizes, light and sharp</li>'),
 
     # 04 web
-    ('<p class="pre">Sitios web y apps</p>', '<p class="pre">Websites and apps</p>'),
-    ('<h2 id="web-t">El diseño, <em>funcionando</em> en el celular.</h2>', '<h2 id="web-t">Design, <em>working</em> on your phone.</h2>'),
-    ('<p class="area-intro">Diseño y programo sitios rápidos, accesibles y en dos idiomas. Los publico en mi propio servidor y los pruebo en celular, tableta y escritorio antes de entregarlos.</p>',
-     '<p class="area-intro">I design and build fast, accessible, bilingual websites. I host them on my own server and test them on phone, tablet and desktop before handing them over.</p>'),
     ('alt="Portada del sitio Kauxte"', 'alt="Kauxte home page"'),
     ('<span class="sr-only">Abrir kauxte.com</span>', '<span class="sr-only">Open kauxte.com</span>'),
     ('<p class="pre">Mi estudio</p>', '<p class="pre">My studio</p>'),
@@ -225,14 +483,8 @@ PARES = [
     ('<span><b>Odontología Tres Picos</b>Consultorio · servicios, equipo y primera visita</span>', '<span><b>Odontología Tres Picos</b>Dental clinic · services, team and first visit</span>'),
     ('<span><b>Puntada Kantuta</b>Bordados · catálogo y cotización</span>', '<span><b>Puntada Kantuta</b>Embroidery · catalogue and quotes</span>'),
     ('<span><b>Nativzar</b>Proyectos cristocéntricos · Shorts y logo 3D</span><em>Propio</em>', '<span><b>Nativzar</b>Christ-centred projects · Shorts and 3D logo</span><em>Mine</em>'),
-    ('<h3>Apps y herramientas</h3>', '<h3>Apps and tools</h3>'),
-    ('<span>App Android para clubes, eventos y reportes del Ministerio Joven, con lector QR.</span>', '<span>Android app for clubs, events and Youth Ministries reports, with a QR reader.</span>'),
-    ('<span>App web instalable para generar y evaluar con códigos QR en campamentos.</span>', '<span>Installable web app to create QR codes and score with them at camps.</span>'),
-    ('<b>Certificados con QR</b><span>Generador de certificados y página pública para validarlos.</span>', '<b>QR certificates</b><span>Certificate generator and a public page to verify them.</span>'),
-    ('<b>Curso virtual SGC</b><span>Recursos de capacitación para líderes de Conquistadores.</span>', '<b>SGC online course</b><span>Training resources for Pathfinder leaders.</span>'),
 
     # 05 IA
-    ('<p class="pre">IA aplicada</p>', '<p class="pre">Applied AI</p>'),
     ('<h2 id="ia-t">La IA acelera. <em>El criterio decide.</em></h2>', '<h2 id="ia-t">AI speeds things up. <em>Judgement decides.</em></h2>'),
     ('<p class="area-intro">Uso la IA como parte del taller, no como atajo: genero bocetos, voces y tomas, y después elijo, corrijo y termino cada pieza con criterio de diseño.</p>',
      '<p class="area-intro">I use AI as part of the workshop, not as a shortcut: I generate drafts, voices and shots, then choose, correct and finish each piece with a designer\'s eye.</p>'),
@@ -241,8 +493,6 @@ PARES = [
      '<div><h3>Image</h3><p>Characters and illustrations made with image generators, corrected until every detail of the uniform and emblems is right.</p></div>'),
     ('<h3>Video</h3><p>Tomas cinematográficas con <b>Higgsfield</b> y animación por código con Remotion.</p>', '<h3>Video</h3><p>Cinematic shots with <b>Higgsfield</b> and animation in code with Remotion.</p>'),
     ('<h3>Voz</h3><p>Narraciones con <b>ElevenLabs</b>, voz clonada propia y limpieza de audio.</p>', '<h3>Voice</h3><p>Narration with <b>ElevenLabs</b>, my own cloned voice and audio clean-up.</p>'),
-    ('<h3>Código y agentes</h3><p>Desarrollo con <b>Claude Code</b>, Codex y Cursor. Agentes con LangGraph, CrewAI y n8n, y un flujo de agentes que diseña los afiches del club.</p>',
-     '<h3>Code and agents</h3><p>I develop with <b>Claude Code</b>, Codex and Cursor. Agents with LangGraph, CrewAI and n8n, and an agent workflow that designs the club\'s posters.</p>'),
 
     # aprendiendo
     ('<div class="fm-marco fm-a"><span>Frame · Móvil</span>', '<div class="fm-marco fm-a"><span>Frame · Mobile</span>'),
@@ -259,10 +509,7 @@ PARES = [
 
     # herramientas
     ('<p class="pre">Herramientas</p>', '<p class="pre">Tools</p>'),
-    ('<h2 id="herr-t">Con qué <em>trabajo.</em></h2>', '<h2 id="herr-t">What I <em>work with.</em></h2>'),
     ('<h3>Diseño</h3><ul><li>Canva</li><li>Figma <em>aprendiendo</em></li><li>Three.js (logos 3D)</li>', '<h3>Design</h3><ul><li>Canva</li><li>Figma <em>learning</em></li><li>Three.js (3D logos)</li>'),
-    ('<h3>Web y apps</h3>', '<h3>Web and apps</h3>'),
-    ('<h3>IA</h3><ul>', '<h3>AI</h3><ul>'),
 
     # trayectoria
     ('<p class="pre">Trayectoria</p>', '<p class="pre">Experience</p>'),
@@ -296,29 +543,41 @@ PARES = [
     # contacto y pie
     ('<p class="pre">Contacto</p>', '<p class="pre">Contact</p>'),
     ('<h2 id="contacto-t">¿Tienes un proyecto? <em>Hagámoslo bien.</em></h2>', '<h2 id="contacto-t">Got a project? <em>Let\'s do it right.</em></h2>'),
-    ('<p>Afiches, un logo, un video para redes o un sitio web completo. Cuéntame qué necesitas y te respondo con una propuesta clara.</p>',
-     '<p>Posters, a logo, a social media video or a complete website. Tell me what you need and I\'ll reply with a clear proposal. I work in Spanish and English.</p>'),
-    ('<p><a href="../nativzar-mj/">Nativzar MJ</a> · <a href="../nativzar-mj/privacidad.html">Privacidad</a> · <a href="../nativzar-mj/terminos.html">Términos</a></p>',
-     '<p><a href="../nativzar-mj/" hreflang="es">Nativzar MJ</a> · <a href="../nativzar-mj/privacidad.html" hreflang="es">Privacy (Spanish)</a> · <a href="../nativzar-mj/terminos.html" hreflang="es">Terms (Spanish)</a></p>'),
     ('<dialog class="visor" data-visor aria-label="Imagen ampliada">', '<dialog class="visor" data-visor aria-label="Enlarged image">'),
     ('<button class="redondo visor-cerrar" aria-label="Cerrar">', '<button class="redondo visor-cerrar" aria-label="Close">'),
 ]
 
-for es, en in PARES:
-    n = s.count(es)
-    if n == 0:
-        raise SystemExit(f'No encontré este texto en index.html (¿cambió?):\n  {es[:120]}')
-    s = s.replace(es, en)
+usados = set()
+for c in PAGINAS:
+    s = paginas[c]
+    for es, en in PARES:
+        if es in s:
+            s = s.replace(es, en); usados.add(es)
+    # enlace de idioma, dirección canónica y og:url de cada página
+    prof = '../' * (c.count('/') + 1)
+    s, n = re.subn(r'<a class="idioma" href="[^"]*" hreflang="en" lang="en"><span class="sr-only">Read in English · </span>EN</a>',
+                   f'<a class="idioma" href="{prof}{c}" hreflang="es" lang="es"><span class="sr-only">Leer en español · </span>ES</a>', s)
+    assert n == 1, c
+    s = s.replace(f'<link rel="canonical" href="{BASE}{c}">', f'<link rel="canonical" href="{BASE}en/{c}">')
+    s = s.replace(f'<meta property="og:url" content="{BASE}{c}">', f'<meta property="og:url" content="{BASE}en/{c}">\n<meta property="og:locale" content="en_US">')
+    paginas[c] = s
+
+faltan = [es for es, _ in PARES if es not in usados]
+if faltan:
+    raise SystemExit('No encontré estos textos en ninguna página (¿cambiaron?):\n' + '\n'.join('  ' + f[:120] for f in faltan))
 
 # 3. Aviso: texto visible que todavía parezca español
-cuerpo = re.sub(r'<(script|style|svg)\b.*?</\1>', '', s, flags=re.S)
-texto = re.sub(r'<[^>]+>', '\n', cuerpo)
-sospechoso = [t.strip() for t in texto.split('\n') if re.search(r'[áéíóúñ¿¡]| y | de | con | para ', t)]
-permitido = ('Edilson Byron Laura Mercado', 'Leer en español', 'Salteña', 'Misión Boliviana', 'Universidad', 'Odontología', 'PASY Mascotas', 'Trazo andino', 'Kauxte', 'kauxte')
-resto = [t for t in sospechoso if t and not any(p in t for p in permitido)]
-salida = RAIZ / 'en/index.html'
-salida.parent.mkdir(exist_ok=True)
-salida.write_text(s, encoding='utf-8')
-print(f'en/index.html: {len(PARES)} textos traducidos')
-if resto:
-    print('Revisar, parece español:'); [print('  ·', t[:110]) for t in resto]
+permitido = ('Edilson Byron Laura Mercado', 'Leer en español', 'Salteña', 'Misión Boliviana', 'Universidad', 'Odontología', 'PASY Mascotas', 'Trazo andino', 'Kauxte', 'kauxte', 'afiches-iasd', 'cartillas-iasd', 'reparar-simbolos-iasd', 'Camporí QR')
+for c in PAGINAS:
+    s = paginas[c]
+    cuerpo = re.sub(r'<(script|style|svg|pre)\b.*?</\1>', '', s, flags=re.S)
+    texto = re.sub(r'<[^>]+>', '\n', cuerpo)
+    sospechoso = [t.strip() for t in texto.split('\n') if re.search(r'[áéíóúñ¿¡]| y | de | con | para ', t)]
+    resto = [t for t in sospechoso if t and not any(p in t for p in permitido)]
+    salida = RAIZ / 'en' / c / 'index.html'
+    salida.parent.mkdir(parents=True, exist_ok=True)
+    salida.write_text(s, encoding='utf-8')
+    print(f'en/{c}index.html escrita')
+    if resto:
+        print('  Revisar, parece español:'); [print('   ·', t[:110]) for t in resto]
+print(f'{len(PARES)} textos traducidos')

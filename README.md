@@ -21,8 +21,8 @@ La plantilla Bootstrap «Grayscale» de 2020 se reemplazó por un sitio propio, 
 
 ### Archivos
 
-- `index.html`: la página en español. `en/index.html`: la versión en inglés, generada por `herramientas/construir_en.py`.
-- `css/portafolio-20261124-3.css` y `js/portafolio-20261124-3.js`: estilos y comportamiento. Llevan versión en el nombre, así que un cambio futuro necesita un nombre nuevo.
+- `index.html` (inicio), `diseno/index.html` y `software/index.html`: las páginas en español (desde el 26/11/2026). `en/…`: sus versiones en inglés, generadas por `herramientas/construir_en.py`.
+- `css/portafolio-20261126-1.css` y `js/portafolio-20261126-1.js`: estilos y comportamiento. Llevan versión en el nombre, así que un cambio futuro necesita un nombre nuevo.
 - `fonts/`: Bricolage Grotesque, DM Sans y Fraunces (licencia OFL), las mismas de Kauxte. No se usa Google Fonts.
 - `img/2026/` y `video/2026/`: medios optimizados (WebP y vistas previas MP4 de 70–270 KB). Los genera `herramientas/preparar_medios.py`.
 - `img/2026/og-ediquin.jpg`: imagen para compartir el enlace. Se genera con `herramientas/captura_og.mjs`.
@@ -187,6 +187,65 @@ El titular eligió en la galería la animación de Horeb, el afiche del curso de
   - el logo 3D carga con aceleración, con sombras, y gira;
   - el carrusel avanza;
   - la animación arranca sola al verse.
+
+## Sexta versión del 26/11/2026: dos caminos (rama `caminos-2026-11`, sin publicar)
+
+**Pedido del titular:** el portafolio había quedado orientado al diseño. Pidió separar el trabajo en dos partes, diseño y video por un lado y software e IA agéntica por el otro, para que cada visitante entre por la que le interesa, de preferencia en páginas distintas. También pidió incluir AI_design_7thday, la skill que diseña afiches con los emblemas del Ministerio Joven y que ya está en nativzar.com.
+
+**Por qué páginas separadas y no pestañas:** cada camino tiene su propia dirección para compartir. Por ejemplo, `…/software/` se le manda a un reclutador y `…/diseno/` a una iglesia o a una marca. Además, cada página tiene su propio título y descripción para los buscadores.
+
+| Página | Qué tiene |
+|---|---|
+| `index.html` (inicio) | Héroe con el nombre, ahora con una pieza de código (agente de IA) en el collage y cuatro cifras, entre ellas «Apps y herramientas: 7». «Ver mi trabajo» baja a **dos puertas**, «Diseño y video» y «Software e IA agéntica», y debajo hay un puente a AI_design_7thday. Siguen la Trayectoria completa y el Contacto. |
+| `diseno/` | 01 Diseño, 02 Video y 03 Foto, iguales que antes. En Video se agregó «Videos hechos con código», con 6 de los 10 estilos de Kauxte (vistas WebP copiadas de `portafolio_web/marca/video/`, 144 KB) y un enlace a kauxte.com/#video. Le siguen 04 IA creativa (imagen, video y voz, más la tarjeta «Afiches con mi propio agente», que enlaza a Software), Figma, las herramientas de diseño y un contacto con enlace al otro camino. |
+| `software/` | 01 Experiencia (CodeRoad, UAB, PASY y proyecto de grado), 02 Sitios web (Kauxte y las demos), 03 Apps: seis tarjetas con estado, tecnologías y enlace, con dibujos tomados de nativzar.com. 04 IA agéntica tiene a AI_design_7thday como proyecto principal, con terminal, skills y ontología, y además desarrollo con agentes, LangGraph/CrewAI/n8n y video por código. Siguen 05 Servidor propio (aislado, con versiones, probado y respaldado, sin direcciones ni nombres de máquinas), las herramientas de software y el contacto. |
+
+- **Menú:** «01 Diseño y video · 02 Software e IA · Trayectoria», con el camino actual resaltado. En el celular ya no se oculta: pasa a una segunda fila.
+- **Enlaces viejos:** `…/ediquinweb/#web`, `#ia`, `#diseno`, `#video`, `#foto`, `#aprendiendo` y `#herramientas` redirigen a la sección equivalente del camino nuevo (`js/portafolio-20261126-1.js`, paso 0).
+- **Archivos:** CSS y JS pasaron a `-20261126-1`. Los estilos nuevos están al final del CSS, en el bloque «Dos caminos». El reparto se hizo una sola vez con un script descartable. Desde ahora las tres páginas en español son la fuente y se editan a mano.
+- **Inglés:** `herramientas/construir_en.py` genera `en/`, `en/diseno/` y `en/software/` (322 textos). Los enlaces entre páginas traducidas se quedan en inglés, y los recursos y `nativzar-mj/` suben de nivel. Si un texto en español cambia, el script dice cuál dejó de encontrarse.
+- **Datos que no se inventaron:** todo sale del README anterior, del CV ya publicado, de nativzar.com y de kauxte.com. Se corrigieron dos frases para no exagerar: el servidor tiene «mis sitios y demos», todavía no sitios de clientes.
+- **Contraste:** se oscurecieron dos colores decorativos de la maqueta de Figma (`.var` y la etiqueta del cursor) que no llegaban a 4,5:1.
+
+**Verificación local (26/11/2026, http://localhost:8093/):** `qa_portafolio.mjs` dio **182 bien, 0 mal** en 6 páginas (3 en español y 3 en inglés) y a 390, 768 y 1440 px. Pruebas nuevas:
+- todos los enlaces internos de cada página responden 200;
+- el menú de caminos se ve en el celular;
+- `#web`, `#diseno` e `#ia` redirigen al camino correcto;
+- el enlace de idioma correcto en cada subpágina;
+- la prueba de reducir movimiento ahora corre en `diseno/`.
+
+axe mide el contraste sin la animación de aparición, porque esa animación deja a medio fundir lo que está en el borde de la pantalla, que es su estado de transición. Además se revisaron capturas en el navegador a 1440 y a 375 px. **No probado:** en vivo en GitHub Pages, que se sirve bajo `/ediquinweb/`. Las rutas son relativas, así que no debería cambiar nada.
+
+**Ajuste del mismo día: nombres técnicos, certificaciones y clips.**
+- **Pedido del titular:** que un reclutador encuentre los nombres técnicos de lo que hace, tanto en software como en video. En las puertas del inicio:
+  - «Apps para el Ministerio Joven con QR» pasó a «Desarrollo móvil (Flutter)».
+  - «Sitios web» pasó a «Desarrollo full-stack y DevOps».
+  - Se sumaron «IA agéntica: agentes, LangGraph y MCP» y «QA y automatización de pruebas».
+  - En diseño: «Diseño gráfico y branding», «Edición de video y motion graphics», «Animación 3D» e «IA generativa».
+- **Nombres de las secciones:**
+  - En `software/`: 02 Desarrollo full-stack, 03 Desarrollo móvil y apps y 05 DevOps e infraestructura.
+  - En `diseno/`: Diseño gráfico y branding, Edición de video y motion graphics, Retoque y composición fotográfica, e IA generativa.
+  - El rol del héroe suma «Diseño y video», como en el CV.
+- **Palabras clave:** debajo del título de cada sección hay una fila con las habilidades y tecnologías de esa área (Branding, Motion graphics, DaVinci Resolve, React, REST APIs, Flutter, LangGraph, MCP, Cloudflare Tunnel…).
+- **06 Certificaciones y formación** (`software/#certificaciones`), con datos del CV `cvEdilsonLaura.pdf` del 26/11/2026:
+  - el título de la UMSA y el diplomado de la UAB;
+  - el reconocimiento TechStar de CodeRoad;
+  - los cursos de Anthropic, LangChain, CodeRoad y Platzi, con su año;
+  - los idiomas.
+
+  Los nombres de los cursos van como los emite cada institución. No hay enlaces a los certificados porque no se encontraron sus direcciones.
+- **Herramientas de software,** según el CV:
+  - lenguajes: Python, JavaScript, Java y PHP;
+  - bases de datos: MongoDB, además de las anteriores;
+  - nube: DigitalOcean, además de las anteriores;
+  - QA y DevOps: Playwright, Selenium, PyTest, Postman, Sentry y Scrum.
+- **Clips en «Videos hechos con código»:**
+  - **Qué son:** el titular propuso GIF. En su lugar se usan clips MP4 mudos de 4 s, que se ven igual y pesan mucho menos: 6 clips, 424 KB en total, en `video/2026/estilo-*-480.mp4`.
+  - **Cómo se hicieron:** se cortaron de los demos de Kauxte con `ffmpeg -ss 1 -t 4`, recortados a 4:3, a 480×360, 24 fps y CRF 30.
+  - **Cómo se comportan:** corren solos mientras la sección está a la vista y tienen un botón para pausarlos (WCAG 2.2.2). Con *reducir movimiento* o ahorro de datos arrancan en pausa y no se descargan. Es el paso 9 del JS.
+- **QA:** **187 bien, 0 mal**. Ahora prueba también que los clips corren a la vista, que el botón los pausa y que con *reducir movimiento* no se descargan. El inglés tiene 347 textos.
+
+**Para publicar:** fusionar `caminos-2026-11` en `master` y subir. **Para revertir:** `git checkout master`, porque la rama no toca `master`.
 
 ### Pendiente del titular
 
