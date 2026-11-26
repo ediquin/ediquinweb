@@ -188,7 +188,7 @@ El titular eligió en la galería la animación de Horeb, el afiche del curso de
   - el carrusel avanza;
   - la animación arranca sola al verse.
 
-## Sexta versión del 26/11/2026: dos caminos (rama `caminos-2026-11`, sin publicar)
+## Sexta versión del 26/11/2026: dos caminos (publicada)
 
 **Pedido del titular:** el portafolio había quedado orientado al diseño. Pidió separar el trabajo en dos partes, diseño y video por un lado y software e IA agéntica por el otro, para que cada visitante entre por la que le interesa, de preferencia en páginas distintas. También pidió incluir AI_design_7thday, la skill que diseña afiches con los emblemas del Ministerio Joven y que ya está en nativzar.com.
 
@@ -245,7 +245,11 @@ axe mide el contraste sin la animación de aparición, porque esa animación dej
   - **Cómo se comportan:** corren solos mientras la sección está a la vista y tienen un botón para pausarlos (WCAG 2.2.2). Con *reducir movimiento* o ahorro de datos arrancan en pausa y no se descargan. Es el paso 9 del JS.
 - **QA:** **187 bien, 0 mal**. Ahora prueba también que los clips corren a la vista, que el botón los pausa y que con *reducir movimiento* no se descargan. El inglés tiene 347 textos.
 
-**Para publicar:** fusionar `caminos-2026-11` en `master` y subir. **Para revertir:** `git checkout master`, porque la rama no toca `master`.
+**Publicación (26/11/2026):**
+- Con el visto bueno del titular, `caminos-2026-11` se fusionó en `master` sin conflictos (fast-forward, commit `e142a84`) y se subió a GitHub. GitHub Pages lo construyó sin errores.
+- **En vivo:** responden con 200 las seis páginas, el CSS, el JS, los clips y `nativzar-mj/`.
+- **`qa_portafolio.mjs` sobre https://ediquin.github.io/ediquinweb/: 187 bien, 0 mal.**
+- **Para revertir:** `git revert e142a84` y subir, o volver `master` a `274f751`.
 
 ### Pendiente del titular
 
